@@ -2,34 +2,40 @@
 
 class SpecialWiretap extends SpecialPage {
 
-	function __construct() {
-		parent::__construct( 'Wiretap' );
+	public function __construct() {
+		parent::__construct( 
+			"Wiretap", // 
+			"",  // rights required to view
+			true // show in Special:SpecialPages
+		);
 	}
-
+	
 	function execute( $parser = null ) {
 		global $wgRequest, $wgOut, $wgUser;
 
-		$wgOut->setPageTitle( 'Wiretap: User page views' );
+		$wgOut->setPageTitle( 'Special Wire Tap' );
 
 		list( $limit, $offset ) = wfCheckLimits();
 
-		$userTarget = isset( $parser ) ? $parser : $wgRequest->getVal( 'username' );
+		// $userTarget = isset( $parser ) ? $parser : $wgRequest->getVal( 'username' );
 
-		$pager = new UserPageViewTrackerPager( $wgUser );
-		$form = $pager->getForm();
-		$body = $pager->getBody();
-		$html = $form;
-		if ( $body ) {
-			$html .= $pager->getNavigationBar();
-			$html .= '<table class="wikitable" width="100%" cellspacing="0" cellpadding="0">';
-			$html .= '<tr><th>Username</th><th>Page</th><th>Views</th><th>Last</th></tr>';
-			$html .= $body;
-			$html .= '</table>';
-			$html .= $pager->getNavigationBar();
-		} else {
-			$html .= '<p>' . wfMsgHTML('listusers-noresult') . '</p>';
-		}
-		$wgOut->addHTML( $html );
+		// $pager = new UserPageViewTrackerPager( $wgUser );
+		// $form = $pager->getForm();
+		// $body = $pager->getBody();
+		// $html = $form;
+		// if ( $body ) {
+			// $html .= $pager->getNavigationBar();
+			// $html .= '<table class="wikitable" width="100%" cellspacing="0" cellpadding="0">';
+			// $html .= '<tr><th>Username</th><th>Page</th><th>Views</th><th>Last</th></tr>';
+			// $html .= $body;
+			// $html .= '</table>';
+			// $html .= $pager->getNavigationBar();
+		// } else {
+			// $html .= '<p>' . wfMsgHTML('listusers-noresult') . '</p>';
+		// }
+		// $wgOut->addHTML( $html );
+	
+		$wgOut->addHTML( "this is a test" );
 	}
 }
 

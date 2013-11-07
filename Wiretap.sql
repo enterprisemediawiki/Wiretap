@@ -1,13 +1,14 @@
 CREATE TABLE IF NOT EXISTS /*_*/wiretap (
 	page_id INT(8) UNSIGNED NOT NULL,
-	user_name VARCHAR(255),
+	page_name VARCHAR(255) DEFAULT NULL,
+	user_name VARCHAR(255) DEFAULT NULL,
 	hit_timestamp CHAR(14) DEFAULT NULL,
 
 	hit_year CHAR(4) DEFAULT NULL,
 	hit_month CHAR(2) DEFAULT NULL,
 	hit_day CHAR(2) DEFAULT NULL,
 	hit_hour CHAR(2) DEFAULT NULL,
-	hit_weekday CHAR(2) DEFAULT NULL,
+	hit_weekday TINYINT DEFAULT NULL,
 
 	page_action VARCHAR(255) DEFAULT NULL,
 	oldid INT(10) UNSIGNED DEFAULT NULL,
@@ -16,7 +17,7 @@ CREATE TABLE IF NOT EXISTS /*_*/wiretap (
 	referer_url TEXT DEFAULT NULL,   /* full url of referring page */
 	referer_title VARCHAR(255) DEFAULT NULL,  /* null if not a wiki page */
 
-	PRIMARY KEY ( page_id, user_name, hit_timestamp )
+	PRIMARY KEY ( page_name, user_name, hit_timestamp )
 );
 
 -- CREATE OR REPLACE VIEW /*_*/user_page_hits AS SELECT

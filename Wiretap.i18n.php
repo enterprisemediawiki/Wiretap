@@ -12,5 +12,6 @@ $messages = array();
  * @author James Montalvo
  */
 $messages['en'] = array(
+	'wiretap' => 'Wiretap',
 	'wiretap-desc' => '[[Special:Wiretap|Tracks page views]] and offers several data displays',
 );
