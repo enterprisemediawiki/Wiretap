@@ -13,7 +13,7 @@ class SpecialWiretap extends SpecialPage {
 	function execute( $parser = null ) {
 		global $wgRequest, $wgOut, $wgUser;
 
-		$wgOut->setPageTitle( 'Special Wire Tap' );
+		$wgOut->setPageTitle( 'Wiretap' );
 
 		list( $limit, $offset ) = wfCheckLimits();
 
@@ -110,8 +110,11 @@ class WiretapPager extends ReverseChronologicalPager {
 		else
 			$referer = '';
 		
-		$timestamp = $row->hit_timestamp;
 		
+		// $timestamp = $row->hit_timestamp;
+		global $wgLang;
+		$timestamp = $wgLang->timeanddate( wfTimestamp( TS_MW, $row->hit_timestamp ), true );
+
 		return "<tr><td>$name</td><td>$page</td><td>$timestamp</td><td>$referer</td></tr>\n";
 	}
 
