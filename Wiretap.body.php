@@ -6,23 +6,10 @@ class Wiretap {
 
 
 	/**
-		page_id
-		user_name
-		hit_timestamp
-
-		hit_year
-		hit_month
-		hit_day
-		hit_hour
-		hit_weekday
-
-		page_action
-		oldid
-		diff
-
-		referer_url
-		referer_title 
-	**/
+	 *
+	 *
+	 *
+	 **/
 	public static function updateTable( &$title, &$article, &$output, &$user, $request, $mediaWiki ) {
 		
 		$output->enableClientCache( false );
@@ -44,15 +31,13 @@ class Wiretap {
 			'page_action' => $request->getVal( 'action' ),
 			'oldid' => $request->getVal( 'oldid' ),
 			'diff' => $request->getVal( 'diff' ),
-
-			'referer_url' => $_SERVER["HTTP_REFERER"],
-			'referer_title' => self::getRefererTitleText(),
 		);
+
+		$hit['referer_url'] = isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : null;
+		$hit['referer_title'] = self::getRefererTitleText( $request->getVal('refererpage') );
+
 		
 		$dbw = wfGetDB( DB_MASTER );
-
-		// print_r($hit);
-		// return true;
 		
 		$dbw->insert(
 			'wiretap',
@@ -70,13 +55,24 @@ class Wiretap {
 		return true;
 	}
 	
-	public static function getRefererTitleText () {
-	
+	/**
+	 *	See WebRequest::getPathInfo() for ideas/info
+	 *  Make better use of: $wgScript, $wgScriptPath, $wgArticlePath;
+	 *
+	 *  Other recommendations:
+	 *    wfSuppressWarnings();
+	 *    $a = parse_url( $url );
+	 *    wfRestoreWarnings();
+	 **/
+	public static function getRefererTitleText ( $refererpage=null ) {
+		
 		// global $egWiretapReferers;
 		global $wgScriptPath;
 	
-		if ( isset( $refererParam ) )
-			return $refererParam;
+		if ( $refererpage )
+			return $refererpage;
+		else if ( ! isset($_SERVER["HTTP_REFERER"]) )
+			return null;
 	
 		$wikiBaseUrl = WebRequest::detectProtocol() . '://' . $_SERVER['HTTP_HOST'] . $wgScriptPath;
 		
@@ -104,5 +100,4 @@ class Wiretap {
 		
 	}
 	
-
 }

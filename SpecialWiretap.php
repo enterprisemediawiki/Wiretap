@@ -39,7 +39,7 @@ class SpecialWiretap extends SpecialPage {
 	}
 }
 
-class WiretapPager extends AlphabeticPager {
+class WiretapPager extends IndexPager {
 	protected $rowCount = 0;
 
 	function __construct( $username = null ) {
@@ -51,14 +51,17 @@ class WiretapPager extends AlphabeticPager {
 		$this->ignoreUserList = explode("|", $this->ignoreUsers);
 	}
 
-	//Implementing remaining abstract method
+	// Implementing remaining abstract method
 	function getIndexField() {
 		return "rownum";
 	}
 
+	function getNavigationBar() {
+		return "";
+	}
+	
 	function getQueryInfo() {
 		global $wgDBprefix;
-		list( $userpagehits ) = wfGetDB( DB_SLAVE )->tableNamesN( 'user_page_hits' );
 		$conds = array();
 		if ( $this->filterUsers ) {
 			$includeUsers = "user_name in ( '";
@@ -70,19 +73,14 @@ class WiretapPager extends AlphabeticPager {
 			$excludeUsers .= implode( "', '", $this->ignoreUserList ) . "')";
 			$conds[] = $excludeUsers;
 		}
-		$table = "(select @rownum:=@rownum+1 as rownum,";
-		$table .= "user_name, page_namespace, page_title,hits, last ";
-		$table .= "from (select @rownum:=0) r, ";
-		$table .= "(select user_name, page_namespace, page_title,hits,";
-		$table .= "last from " . $wgDBprefix . "user_page_hits) p) results";
 		return array(
-			'tables' => " $table ",
-			'fields' => array( 'rownum',
-			'user_name',
-			'page_namespace',
-			'page_title',
-			'hits',
-			"concat(substr(last, 1, 4),'-',substr(last,5,2),'-',substr(last,7,2),' ',substr(last,9,2),':',substr(last,11,2),':',substr(last,13,2)) AS last"),
+			'tables' => $wgDBprefix.'wiretap',
+			'fields' => array( 
+				'page_id',
+				'page_name',
+				'user_name',
+				"concat(substr(hit_timestamp, 1, 4),'-',substr(hit_timestamp,5,2),'-',substr(hit_timestamp,7,2),' ',substr(hit_timestamp,9,2),':',substr(hit_timestamp,11,2),':',substr(hit_timestamp,13,2)) AS hit_timestamp"
+			),
 			'conds' => $conds
 		);
 	}
