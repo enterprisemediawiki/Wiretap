@@ -49,9 +49,7 @@ class Wiretap {
 
 	public static function updateDatabase( DatabaseUpdater $updater ) {
 		global $wgDBprefix;
-		die('fixme: table names'); 
 		$updater->addExtensionTable( $wgDBprefix . 'wiretap', __DIR__ . '/Wiretap.sql' );
-		//$updater->addExtensionTable( $wgDBprefix . 'user_page_hits', __DIR__ . '/Wiretap.sql' );
 		return true;
 	}
 	
