@@ -11,7 +11,7 @@ class SpecialWiretap extends SpecialPage {
 	}
 	
 	function execute( $parser = null ) {
-		global $wgRequest, $wgOut, $wgUser;
+		global $wgRequest, $wgOut;
 
 		$wgOut->setPageTitle( 'Wiretap' );
 
@@ -19,7 +19,7 @@ class SpecialWiretap extends SpecialPage {
 
 		// $userTarget = isset( $parser ) ? $parser : $wgRequest->getVal( 'username' );
 
-		$pager = new WiretapPager( $wgUser );
+		$pager = new WiretapPager();
 		// $form = $pager->getForm();
 		$body = $pager->getBody();
 		$html = '';
@@ -31,59 +31,60 @@ class SpecialWiretap extends SpecialPage {
 			$html .= $body;
 			$html .= '</table>';
 			$html .= $pager->getNavigationBar();
-		} else {
+		} 
+		else {
 			$html .= '<p>' . wfMsgHTML('listusers-noresult') . '</p>';
 		}
 		$wgOut->addHTML( $html );
 	
-		// $wgOut->addHTML( "this is a test" );
 	}
 }
 
 class WiretapPager extends ReverseChronologicalPager {
 	protected $rowCount = 0;
 
-	function __construct( $username = null ) {
+	function __construct() {
 		parent::__construct();
-		global $wgRequest;
-		$this->filterUsers = $wgRequest->getVal( 'filterusers' );
-		$this->filterUserList = explode("|", $this->filterUsers);
-		$this->ignoreUsers = $wgRequest->getVal( 'ignoreusers' );
-		$this->ignoreUserList = explode("|", $this->ignoreUsers);
+		// global $wgRequest;
+		// $this->filterUsers = $wgRequest->getVal( 'filterusers' );
+		// $this->filterUserList = explode("|", $this->filterUsers);
+		// $this->ignoreUsers = $wgRequest->getVal( 'ignoreusers' );
+		// $this->ignoreUserList = explode("|", $this->ignoreUsers);
 	}
 
-	// Implementing remaining abstract method
 	function getIndexField() {
 		return "hit_timestamp";
 	}
+	
 	function getExtraSortFields() {
 		return array();
 	}
 
-	function getNavigationBar() {
-		return "";
+	function isNavigationBarShown() {
+		return true;
 	}
 	
 	function getQueryInfo() {
 		global $wgDBprefix;
 		$conds = array();
-		if ( $this->filterUsers ) {
-			$includeUsers = "user_name in ( '";
-			$includeUsers .= implode( "', '", $this->filterUserList ) . "')";
-			$conds[] = $includeUsers;
-		}
-		if ( $this->ignoreUsers ) {
-			$excludeUsers = "user_name not in ( '";
-			$excludeUsers .= implode( "', '", $this->ignoreUserList ) . "')";
-			$conds[] = $excludeUsers;
-		}
+		// if ( $this->filterUsers ) {
+			// $includeUsers = "user_name in ( '";
+			// $includeUsers .= implode( "', '", $this->filterUserList ) . "')";
+			// $conds[] = $includeUsers;
+		// }
+		// if ( $this->ignoreUsers ) {
+			// $excludeUsers = "user_name not in ( '";
+			// $excludeUsers .= implode( "', '", $this->ignoreUserList ) . "')";
+			// $conds[] = $excludeUsers;
+		// }
 		return array(
 			'tables' => $wgDBprefix.'wiretap',
 			'fields' => array( 
 				'page_id',
 				'page_name',
 				'user_name',
-				"concat(substr(hit_timestamp, 1, 4),'-',substr(hit_timestamp,5,2),'-',substr(hit_timestamp,7,2),' ',substr(hit_timestamp,9,2),':',substr(hit_timestamp,11,2),':',substr(hit_timestamp,13,2)) AS hit_timestamp",
+				// "concat(substr(hit_timestamp, 1, 4),'-',substr(hit_timestamp,5,2),'-',substr(hit_timestamp,7,2),' ',substr(hit_timestamp,9,2),':',substr(hit_timestamp,11,2),':',substr(hit_timestamp,13,2)) AS hit_timestamp",
+				'hit_timestamp',
 				'referer_title',
 			),
 			'conds' => $conds
@@ -110,29 +111,11 @@ class WiretapPager extends ReverseChronologicalPager {
 		else
 			$referer = '';
 		
-		
-		// $timestamp = $row->hit_timestamp;
 		global $wgLang;
 		$timestamp = $wgLang->timeanddate( wfTimestamp( TS_MW, $row->hit_timestamp ), true );
 
 		return "<tr><td>$name</td><td>$page</td><td>$timestamp</td><td>$referer</td></tr>\n";
 	}
-
-	// function getBody() {
-		// if ( ! $this->mQueryDone ) {
-			// $this->doQuery();
-		// }
-		// $batch = new LinkBatch;
-		// $db = $this->mDb;
-		// $this->mResult->rewind();
-		// $this->rowCount = 0;
-		// while ( $row = $this->mResult->fetchObject() ) {
-			// $batch->addObj( Title::makeTitleSafe( NS_USER, $row->user_name ) );
-		// }
-		// $batch->execute();
-		// $this->mResult->rewind();
-		// return parent::getBody();
-	// }
 
 	function getForm() {
 		$out = '<form name="filteruser" id="filteruser" method="post">';
@@ -151,10 +134,11 @@ class WiretapPager extends ReverseChronologicalPager {
 	 */
 	function getDefaultQuery() {
 		$query = parent::getDefaultQuery();
-		if( $this->filterUsers != '' )
-			$query['filterusers'] = $this->filterUsers;
-		if( $this->ignoreUsers != '' )
-			$query['ignoreusers'] = $this->ignoreUsers;
+		// if( $this->filterUsers != '' )
+			// $query['filterusers'] = $this->filterUsers;
+		// if( $this->ignoreUsers != '' )
+			// $query['ignoreusers'] = $this->ignoreUsers;
 		return $query;
 	}
+
 }
