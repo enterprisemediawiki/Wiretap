@@ -94,7 +94,24 @@ class WiretapPager extends ReverseChronologicalPager {
 	function formatRow( $row ) {
 		$userPage = Title::makeTitle( NS_USER, $row->user_name );
 		$name = $this->getSkin()->makeLinkObj( $userPage, htmlspecialchars( $userPage->getText() ) );
-				
+		
+		global $wgUser;
+		if ($wgUser->isAllowed('userrights')) {
+
+			$url = Title::newFromText('Special:UserRights')->getLocalUrl(
+				array( 'user' => $row->user_name )
+			);
+			//$msg = wfMsg( 'approvedrevs-approve' );
+			$msg = 'user rights';
+			
+			$name .= ' (' . Xml::element(
+				'a',
+				array( 'href' => $url ),
+				$msg
+			) . ')';
+
+		}
+		
 		$pageTitle = Title::newFromID( $row->page_id );
 		if ( ! $pageTitle )
 			$pageTitle = Title::newFromText( $row->page_name );
