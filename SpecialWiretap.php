@@ -114,22 +114,21 @@ class SpecialWiretap extends SpecialPage {
 		// ORDER BY wiretap.hit_year DESC, wiretap.hit_month DESC, wiretap.hit_day DESC
 		// LIMIT 100000;
 		$dbr = wfGetDB( DB_SLAVE );
-		$table = Wiretap::getTable();
 
 		$res = $dbr->select(
-			$table,
+			array('w' => 'wiretap'),
 			array(
-				"$table.hit_year AS year", 
-				"$table.hit_month AS month",
-				"$table.hit_day AS day",
+				"w.hit_year AS year", 
+				"w.hit_month AS month",
+				"w.hit_day AS day",
 				"count(*) AS num_hits",
 			),
 			null, // CONDITIONS? 'wiretap.hit_timestamp>20131001000000',
 			__METHOD__,
 			array(
 				"DISTINCT",
-				"GROUP BY" => "$table.hit_year, $table.hit_month, $table.hit_day",
-				"ORDER BY" => "$table.hit_year DESC, $table.hit_month DESC, $table.hit_day DESC",
+				"GROUP BY" => "w.hit_year, w.hit_month, w.hit_day",
+				"ORDER BY" => "w.hit_year DESC, w.hit_month DESC, w.hit_day DESC",
 				"LIMIT" => "100000",
 			),
 			null // join conditions
@@ -172,7 +171,6 @@ class WiretapPager extends ReverseChronologicalPager {
 	}
 	
 	function getQueryInfo() {
-		global $wgDBprefix;
 		$conds = array();
 		// if ( $this->filterUsers ) {
 			// $includeUsers = "user_name in ( '";
@@ -185,7 +183,7 @@ class WiretapPager extends ReverseChronologicalPager {
 			// $conds[] = $excludeUsers;
 		// }
 		return array(
-			'tables' => $wgDBprefix.'wiretap',
+			'tables' => 'wiretap',
 			'fields' => array( 
 				'page_id',
 				'page_name',
