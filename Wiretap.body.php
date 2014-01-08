@@ -3,7 +3,11 @@
 class Wiretap {
 
 	static $referers = null;
-
+	
+	public static function getTable () {
+		$dbr = wfGetDB( DB_SLAVE );
+		return $dbr->tablePrefix() . 'wiretap';
+	}
 
 	/**
 	 *

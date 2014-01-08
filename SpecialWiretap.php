@@ -2,6 +2,8 @@
 
 class SpecialWiretap extends SpecialPage {
 
+	public $mMode;
+
 	public function __construct() {
 		parent::__construct( 
 			"Wiretap", // 
@@ -13,11 +15,65 @@ class SpecialWiretap extends SpecialPage {
 	function execute( $parser = null ) {
 		global $wgRequest, $wgOut;
 
-		$wgOut->setPageTitle( 'Wiretap' );
-
 		list( $limit, $offset ) = wfCheckLimits();
 
 		// $userTarget = isset( $parser ) ? $parser : $wgRequest->getVal( 'username' );
+		$this->mMode = $wgRequest->getVal( 'show' );
+		//$fileactions = array('actions...?');
+
+		$wgOut->addHTML( $this->getPageHeader() );
+		
+		if ($this->mMode == 'dailytotals')
+			$this->totals();
+		else
+			$this->hitsList();
+			
+	}
+	
+	public function getPageHeader() {
+
+		// show the names of the different views
+		$navLine = wfMsg( 'wiretap-viewmode' ) . ' ';
+		
+		$links_messages = array( // pages
+			'wiretap-hits'               => '',
+			'wiretap-dailytotals'        => 'dailytotals',
+		);
+		
+		$navLinks = array();
+		foreach($links_messages as $msg => $query_param) {
+			$navLinks[] = $this->createHeaderLink($msg, $query_param);
+		}
+		$navLine .= implode(' | ', $navLinks);
+		
+		$out = Xml::tags( 'p', null, $navLine ) . "\n";
+		
+		return $out;
+	}
+	
+	function createHeaderLink($msg, $query_param) {
+	
+		$WiretapTitle = SpecialPage::getTitleFor( 'Wiretap' );
+
+		if ( $this->mMode == $query_param ) {
+			return Xml::element( 'strong',
+				null,
+				wfMsg( $msg )
+			);
+		} else {
+			$show = ($query_param == '') ? array() : array( 'show' => $query_param );
+			return Xml::element( 'a',
+				array( 'href' => $WiretapTitle->getLocalURL( $show ) ),
+				wfMsg( $msg )
+			);
+		}
+
+	}
+	
+	public function hitsList () {
+		global $wgOut;
+
+		$wgOut->setPageTitle( 'Wiretap' );
 
 		$pager = new WiretapPager();
 		// $form = $pager->getForm();
@@ -36,7 +92,58 @@ class SpecialWiretap extends SpecialPage {
 			$html .= '<p>' . wfMsgHTML('listusers-noresult') . '</p>';
 		}
 		$wgOut->addHTML( $html );
+	}
 	
+	public function totals () {
+		global $wgOut;
+
+		$wgOut->setPageTitle( 'Wiretap: Daily Totals' );
+
+		$html = '<table class="wikitable"><tr><th>Date</th><th>Hits</th></tr>';
+		// $html = $form;
+		// if ( $body ) {
+		
+		// } 
+		// else {
+			// $html .= '<p>' . wfMsgHTML('listusers-noresult') . '</p>';
+		// }
+		// SELECT wiretap.hit_year, wiretap.hit_month, wiretap.hit_day, count(*) AS num_hits
+		// FROM wiretap
+		// WHERE wiretap.hit_timestamp>20131001000000 
+		// GROUP BY wiretap.hit_year, wiretap.hit_month, wiretap.hit_day
+		// ORDER BY wiretap.hit_year DESC, wiretap.hit_month DESC, wiretap.hit_day DESC
+		// LIMIT 100000;
+		$dbr = wfGetDB( DB_SLAVE );
+		$table = Wiretap::getTable();
+
+		$res = $dbr->select(
+			$table,
+			array(
+				"$table.hit_year AS year", 
+				"$table.hit_month AS month",
+				"$table.hit_day AS day",
+				"count(*) AS num_hits",
+			),
+			null, // CONDITIONS? 'wiretap.hit_timestamp>20131001000000',
+			__METHOD__,
+			array(
+				"DISTINCT",
+				"GROUP BY" => "$table.hit_year, $table.hit_month, $table.hit_day",
+				"ORDER BY" => "$table.hit_year DESC, $table.hit_month DESC, $table.hit_day DESC",
+				"LIMIT" => "100000",
+			),
+			null // join conditions
+		);
+		while( $row = $dbr->fetchRow( $res ) ) {
+		
+			list($year, $month, $day, $hits) = array($row['year'], $row['month'], $row['day'], $row['num_hits']);
+			$html .= "<tr><td>$year-$month-$day</td><td>$hits</td></tr>";
+		
+		}
+		$html .= "</table>";
+		
+		$wgOut->addHTML( $html );
+
 	}
 }
 
