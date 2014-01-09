@@ -17,4 +17,6 @@ $messages['en'] = array(
 	'wiretap-viewmode' => 'View',
 	'wiretap-hits' => 'Individual hits',
 	'wiretap-dailytotals' => 'Daily hits totals',
+	'wiretap-filteruser' => 'filter',
+	'wiretap-filterpage' => 'filter',
 );

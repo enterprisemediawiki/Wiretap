@@ -33,7 +33,7 @@ class SpecialWiretap extends SpecialPage {
 	public function getPageHeader() {
 
 		// show the names of the different views
-		$navLine = wfMsg( 'wiretap-viewmode' ) . ' ';
+		$navLine = '<strong>' . wfMsg( 'wiretap-viewmode' ) . ':</strong> ';
 		
 		$links_messages = array( // pages
 			'wiretap-hits'               => '',
@@ -71,11 +71,14 @@ class SpecialWiretap extends SpecialPage {
 	}
 	
 	public function hitsList () {
-		global $wgOut;
+		global $wgOut, $wgRequest;
 
 		$wgOut->setPageTitle( 'Wiretap' );
 
 		$pager = new WiretapPager();
+		$pager->filterUser = $wgRequest->getVal( 'filterUser' );
+		$pager->filterPage = $wgRequest->getVal( 'filterPage' );
+		
 		// $form = $pager->getForm();
 		$body = $pager->getBody();
 		$html = '';
@@ -148,7 +151,9 @@ class SpecialWiretap extends SpecialPage {
 
 class WiretapPager extends ReverseChronologicalPager {
 	protected $rowCount = 0;
-
+	public $filterUser;
+	public $filterPage;
+	
 	function __construct() {
 		parent::__construct();
 		// global $wgRequest;
@@ -182,6 +187,14 @@ class WiretapPager extends ReverseChronologicalPager {
 			// $excludeUsers .= implode( "', '", $this->ignoreUserList ) . "')";
 			// $conds[] = $excludeUsers;
 		// }
+		
+		if ( $this->filterUser ) {
+			$conds[] = "user_name = '{$this->filterUser}'";
+		}
+		if ( $this->filterPage ) {
+			$conds[] = "page_name = '{$this->filterPage}'";
+		}
+		
 		return array(
 			'tables' => 'wiretap',
 			'fields' => array( 
@@ -200,22 +213,19 @@ class WiretapPager extends ReverseChronologicalPager {
 		$userPage = Title::makeTitle( NS_USER, $row->user_name );
 		$name = $this->getSkin()->makeLinkObj( $userPage, htmlspecialchars( $userPage->getText() ) );
 		
-		global $wgUser;
-		if ($wgUser->isAllowed('userrights')) {
 
-			$url = Title::newFromText('Special:UserRights')->getLocalUrl(
-				array( 'user' => $row->user_name )
-			);
-			//$msg = wfMsg( 'approvedrevs-approve' );
-			$msg = 'user rights';
-			
-			$name .= ' (' . Xml::element(
-				'a',
-				array( 'href' => $url ),
-				$msg
-			) . ')';
+		$url = Title::newFromText('Special:Wiretap')->getLocalUrl(
+			array( 'filterUser' => $row->user_name )
+		);
+		$msg = wfMsg( 'wiretap-filteruser' );
+		
+		$name .= ' (' . Xml::element(
+			'a',
+			array( 'href' => $url ),
+			$msg
+		) . ')';
 
-		}
+
 		
 		$pageTitle = Title::newFromID( $row->page_id );
 		if ( ! $pageTitle )
@@ -226,6 +236,20 @@ class WiretapPager extends ReverseChronologicalPager {
 		else
 			$page = $this->getSkin()->link( $pageTitle );
 
+			
+			
+		$url = Title::newFromText('Special:Wiretap')->getLocalUrl(
+			array( 'filterPage' => $row->page_name )
+		);
+		$msg = wfMsg( 'wiretap-filterpage' );
+		
+		$page .= ' (' . Xml::element(
+			'a',
+			array( 'href' => $url ),
+			$msg
+		) . ')';
+
+		
 		if ( $row->referer_title ) {
 			$referer = Title::newFromText( $row->referer_title );
 			$referer = $this->getSkin()->link( $referer );
