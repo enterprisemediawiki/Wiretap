@@ -31,7 +31,8 @@ class SpecialWiretap extends SpecialPage {
 	}
 	
 	public function getPageHeader() {
-
+		global $wgRequest;
+		
 		// show the names of the different views
 		$navLine = '<strong>' . wfMsg( 'wiretap-viewmode' ) . ':</strong> ';
 		
@@ -39,12 +40,23 @@ class SpecialWiretap extends SpecialPage {
 			'wiretap-hits'               => '',
 			'wiretap-dailytotals'        => 'dailytotals',
 		);
-		
+				
 		$navLinks = array();
 		foreach($links_messages as $msg => $query_param) {
 			$navLinks[] = $this->createHeaderLink($msg, $query_param);
 		}
 		$navLine .= implode(' | ', $navLinks);
+		
+		if ( $wgRequest->getVal( 'filterUser' ) || $wgRequest->getVal( 'filterPage' ) ) {
+			
+			$WiretapTitle = SpecialPage::getTitleFor( 'Wiretap' );
+			$navLine .= ' | ' . Xml::element( 'a',
+				array( 'href' => $WiretapTitle->getLocalURL() ),
+				wfMsg( 'wiretap-unfilter' )
+			);
+
+		}
+
 		
 		$out = Xml::tags( 'p', null, $navLine ) . "\n";
 		
@@ -214,17 +226,21 @@ class WiretapPager extends ReverseChronologicalPager {
 		$name = $this->getSkin()->makeLinkObj( $userPage, htmlspecialchars( $userPage->getText() ) );
 		
 
-		$url = Title::newFromText('Special:Wiretap')->getLocalUrl(
-			array( 'filterUser' => $row->user_name )
-		);
-		$msg = wfMsg( 'wiretap-filteruser' );
-		
-		$name .= ' (' . Xml::element(
-			'a',
-			array( 'href' => $url ),
-			$msg
-		) . ')';
-
+		if ( $this->filterUser ) {
+			// do nothing for now...
+		}
+		else {
+			$url = Title::newFromText('Special:Wiretap')->getLocalUrl(
+				array( 'filterUser' => $row->user_name )
+			);
+			$msg = wfMsg( 'wiretap-filteruser' );
+			
+			$name .= ' (' . Xml::element(
+				'a',
+				array( 'href' => $url ),
+				$msg
+			) . ')';
+		}
 
 		
 		$pageTitle = Title::newFromID( $row->page_id );
@@ -237,18 +253,21 @@ class WiretapPager extends ReverseChronologicalPager {
 			$page = $this->getSkin()->link( $pageTitle );
 
 			
+		if ( $this->filterPage ) {
+			// do nothing for now...
+		}
+		else {
+			$url = Title::newFromText('Special:Wiretap')->getLocalUrl(
+				array( 'filterPage' => $row->page_name )
+			);
+			$msg = wfMsg( 'wiretap-filterpage' );
 			
-		$url = Title::newFromText('Special:Wiretap')->getLocalUrl(
-			array( 'filterPage' => $row->page_name )
-		);
-		$msg = wfMsg( 'wiretap-filterpage' );
-		
-		$page .= ' (' . Xml::element(
-			'a',
-			array( 'href' => $url ),
-			$msg
-		) . ')';
-
+			$page .= ' (' . Xml::element(
+				'a',
+				array( 'href' => $url ),
+				$msg
+			) . ')';
+		}
 		
 		if ( $row->referer_title ) {
 			$referer = Title::newFromText( $row->referer_title );
