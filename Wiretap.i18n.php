@@ -19,5 +19,19 @@ $messages['en'] = array(
 	'wiretap-dailytotals' => 'Daily hits totals',
 	'wiretap-filteruser' => 'filter',
 	'wiretap-filterpage' => 'filter',
-	'wiretap-unfilter' => 'Unfilter',
+	'wiretap-unfilter' => 'Unfilter'
+);
+
+/** German (Deutsch)
+* @author Kghbln
+*/
+$messages['de'] = array(
+	'wiretap' => 'Wiretap',
+	'wiretap-desc' => 'Ermöglicht das Nachvollziehen von Seitenzugriffen und stellt hierzu verschiedene Datenanzeigen bereit',
+	'wiretap-viewmode' => 'Ansicht',
+	'wiretap-hits' => 'Individuelle Zugriffe',
+	'wiretap-dailytotals' => 'Tagesgesamtzugriffe',
+	'wiretap-filteruser' => 'Filter setzen',
+	'wiretap-filterpage' => 'Filter setzen',
+	'wiretap-unfilter' => 'Filter aufheben'
 );
