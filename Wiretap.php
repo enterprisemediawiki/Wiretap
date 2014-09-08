@@ -23,3 +23,34 @@ $wgSpecialPages['Wiretap'] = 'SpecialWiretap'; // register special page
 // $wgHooks['BeforePageDisplay'][] = 'Wiretap::updateTable';
 $wgHooks['BeforeInitialize'][] = 'Wiretap::updateTable';
 $wgHooks['LoadExtensionSchemaUpdates'][] = 'Wiretap::updateDatabase';
+
+
+
+$wiretapResourceTemplate = array(
+	'localBasePath' => __DIR__ . '/modules',
+	'remoteExtPath' => 'Wiretap/modules',
+);
+
+$wgResourceModules += array(
+
+	// 'ext.wiretap.base' => $watchAnalyticsResourceTemplate + array(
+	// 	'styles' => 'base/ext.wiretap.base.css',
+	// ),
+
+	'ext.wiretap.charts' => $wiretapResourceTemplate + array(
+		'styles' => 'charts/ext.wiretap.charts.css',
+		'scripts' => array(
+			'charts/Chart.js',
+			'charts/ext.wiretap.charts.js',
+		),
+		// 'messages' => array(
+		// 	'watchanalytics-pause-visualization',
+		// 	'watchanalytics-unpause-visualization',
+		// ),
+		// 'dependencies' => array(
+		// 	'base',
+		// ),
+
+	),
+
+);

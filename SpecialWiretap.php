@@ -25,6 +25,8 @@ class SpecialWiretap extends SpecialPage {
 		
 		if ($this->mMode == 'dailytotals')
 			$this->totals();
+		else if ( $this->mMode = 'dailytotalschart' )
+			$this->totalsChart();
 		else
 			$this->hitsList();
 			
@@ -156,6 +158,59 @@ class SpecialWiretap extends SpecialPage {
 		}
 		$html .= "</table>";
 		
+		$wgOut->addHTML( $html );
+
+	}
+
+	public function totalsChart () {
+		global $wgOut;
+
+		$wgOut->setPageTitle( 'Wiretap: Daily Totals Chart' );
+		$wgOut->addModules( 'ext.wiretap.charts' );
+
+		$html = '<canvas id="wiretapChart" width="400" height="400"></canvas>';
+
+		$dbr = wfGetDB( DB_SLAVE );
+
+		$res = $dbr->select(
+			array('w' => 'wiretap'),
+			array(
+				"w.hit_year AS year", 
+				"w.hit_month AS month",
+				"w.hit_day AS day",
+				"count(*) AS num_hits",
+			),
+			null, //'w.hit_timestamp > 20140801000000', //null, // CONDITIONS? 'wiretap.hit_timestamp>20131001000000',
+			__METHOD__,
+			array(
+				"DISTINCT",
+				"GROUP BY" => "w.hit_year, w.hit_month, w.hit_day",
+				"ORDER BY" => "w.hit_year ASC, w.hit_month ASC, w.hit_day ASC",
+				"LIMIT" => "100000",
+			),
+			null // join conditions
+		);
+		$previous = null;
+
+		while( $row = $dbr->fetchRow( $res ) ) {
+		
+			list($year, $month, $day, $hits) = array($row['year'], $row['month'], $row['day'], $row['num_hits']);
+
+			$currentDateString = "$year-$month-$day";
+			$current = new DateTime( $currentDateString );
+			
+			while ( $previous && $previous->modify( '+1 day' )->format( 'Y-m-d') !== $currentDateString ) {
+				$data[ $previous->format( 'Y-m-d' ) ] = 0;
+			}
+
+			$data[ $currentDateString ] = $hits;
+
+			$previous = new DateTime( $currentDateString );
+		}
+		
+		//$html .= "<pre>" . print_r( $data, true ) . "</pre>";
+		$html .= "<script type='text/template-json' id='wiretap-data'>" . json_encode( $data ) . "</script>";
+
 		$wgOut->addHTML( $html );
 
 	}
