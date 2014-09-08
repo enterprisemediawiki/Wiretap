@@ -19,6 +19,47 @@ for ( var date in rawData ) {
     hits[ hits.length ] = parseInt( rawData[ date ] );
 }
 
+var getMovingAverage = function ( dataArray, maLength ) {
+
+    var denominator;
+
+    // initialize early datapoints
+    var avgArray = [];
+    // for( var i = 0; i < maLength; i++ ) {
+    //     avgArray.push( 0 );
+    // }
+
+    // // initialize current sum
+    var curSum = 0;
+    // for ( var i = 0; i < maLength; i++ ) {
+    //     curSum += dataArray[ i ];
+    // }
+
+
+
+    // set first "real" datapoint
+    // avgArray[ maLength - 1 ] = curSum / maLength;
+
+    for ( var i = 0; i < dataArray.length; i++ ) {
+        curSum = curSum + dataArray[ i ]; // add in the new value to the moving sum
+        
+        if ( i - maLength >= 0 ) {
+            // subtract oldest value still "part of" moving sum
+            // if reached length of moving sum (if have 7 days in
+            // 7-day moving sum) 
+            curSum = curSum - dataArray[ i - maLength ];
+        }
+
+        denominator = Math.min( i + 1, maLength );
+
+        avgArray[ i ] = curSum / denominator;
+    }
+
+    return avgArray;
+
+};
+
+
 
 var ctx = canvas.get(0).getContext( "2d" );
 
@@ -35,23 +76,33 @@ var data = {
             pointHighlightStroke: "rgba(220,220,220,1)",
             data: hits //[65, 59, 80, 81, 56, 55, 40]
         }
-        // ,{
-        //     label: "My Second dataset",
-        //     fillColor: "rgba(151,187,205,0.2)",
-        //     strokeColor: "rgba(151,187,205,1)",
-        //     pointColor: "rgba(151,187,205,1)",
-        //     pointStrokeColor: "#fff",
-        //     pointHighlightFill: "#fff",
-        //     pointHighlightStroke: "rgba(151,187,205,1)",
-        //     data: [28, 48, 40, 19, 86, 27, 90]
-        // }
+        ,{
+            label: "My Second dataset",
+            fillColor: "rgba(151,187,205,0.2)",
+            strokeColor: "rgba(151,187,205,1)",
+            pointColor: "rgba(151,187,205,1)",
+            pointStrokeColor: "#fff",
+            pointHighlightFill: "#fff",
+            pointHighlightStroke: "rgba(151,187,205,1)",
+            data: getMovingAverage( hits, 7 )
+        }
+        ,{
+            label: "My third dataset",
+            fillColor: "rgba(255,92,92,0.2)",
+            strokeColor: "rgba(255,92,92,1)",
+            pointColor: "rgba(255,92,92,1)",
+            pointStrokeColor: "#fff",
+            pointHighlightFill: "#fff",
+            pointHighlightStroke: "rgba(151,187,205,1)",
+            data: getMovingAverage( hits, 28 )
+        }
     ]
 };
 
 var options = {
 
     ///Boolean - Whether grid lines are shown across the chart
-    scaleShowGridLines : true,
+    scaleShowGridLines : false,
 
     //String - Colour of the grid lines
     scaleGridLineColor : "rgba(0,0,0,.05)",
@@ -75,13 +126,13 @@ var options = {
     pointDotStrokeWidth : 1,
 
     //Number - amount extra to add to the radius to cater for hit detection outside the drawn point
-    pointHitDetectionRadius : 20,
+    pointHitDetectionRadius : 0,
 
     //Boolean - Whether to show a stroke for datasets
-    datasetStroke : true,
+    datasetStroke : false,
 
     //Number - Pixel width of dataset stroke
-    datasetStrokeWidth : 2,
+    datasetStrokeWidth : 1,
 
     //Boolean - Whether to fill the dataset with a colour
     datasetFill : true,
