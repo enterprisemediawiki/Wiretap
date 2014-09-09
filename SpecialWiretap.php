@@ -60,8 +60,8 @@ class SpecialWiretap extends SpecialPage {
 		$navLine .= "<li>" . $this->createHeaderLink( 'wiretap-hits' ) . "</li>";
 
 		$navLine .= "<li>" . wfMessage( 'wiretap-dailytotals' )->text() 
-			. ": (" . $this->createHeaderLink( 'wiretap-rawdata', array( 'show' => 'total-hits-data' ) )
-			. ") (" . $this->createHeaderLink( 'wiretap-chart', array( 'show' => 'total-hits-chart' ) )
+			. ": (" . $this->createHeaderLink( 'wiretap-rawdata', 'total-hits-data' )
+			. ") (" . $this->createHeaderLink( 'wiretap-chart', 'total-hits-chart' )
 			. ")</li>";
 		
 		$navLine .= "<li>" . wfMessage( 'wiretap-dailyunique-user-hits' )->text() 

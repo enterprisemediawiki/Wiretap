@@ -62,7 +62,7 @@ $(document).ready(function(){
 			if ( i % 7 === 0 ) {
 				weekly.push( rawData[0].values[i].x );
 			}
-			if ( i % 30 === 0 ) {
+			if ( i % 28 === 0 ) {
 				monthly.push( rawData[0].values[i].x );
 			}
 		}
@@ -75,8 +75,8 @@ $(document).ready(function(){
 			color: "#FFBB44"
 		} );
 		rawData.push( {
-			key: "30-Day Moving Average",
-			values: getMovingAverage( rawData[0].values, 30 ),
+			key: "28-Day Moving Average",
+			values: getMovingAverage( rawData[0].values, 28 ),
 			color: "#FF0000"
 		} );
 
