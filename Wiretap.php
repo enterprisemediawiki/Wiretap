@@ -69,7 +69,10 @@ $wgResourceModules += array(
 	),
 
 	'ext.wiretap.charts.nvd3' => $wiretapResourceTemplate + array(
-		'styles' => 'nvd3js/nv.d3.css',
+		'styles' => array(
+			'nvd3js/nv.d3.css',
+			'nvd3js/ext.wiretap.nvd3.css',
+		),
 		'scripts' => array(
 			'nvd3js/nv.d3.js',
 			'nvd3js/ext.wiretap.nvd3.js',
