@@ -68,8 +68,9 @@ $(document).ready(function(){
 		}
 
 		rawData.push( {
-			key : "7-Day Moving Average",
-			values : getMovingAverage( rawData[0].values, 7 )
+			key: "7-Day Moving Average",
+			values: getMovingAverage( rawData[0].values, 7 ),
+			color: "#FF0000"
 		} );
 		rawData.push( {
 			key: "30-Day Moving Average",
@@ -87,8 +88,8 @@ $(document).ready(function(){
 
 	nv.addGraph(function() {
 
-		var hitsData = getData();
-		console.log( hitsData );
+//		var hitsData = getData();
+		window.hitsData = getData();
 		window.chart = nv.models.lineWithFocusChart();
 
 		chart.xAxis
@@ -96,13 +97,13 @@ $(document).ready(function(){
 			.tickValues( hitsData.weeklyLabels )
 			.tickFormat(function(d) {
 				return d3.time.format('%x')(new Date(d))
-				});
+			});
 
 		chart.x2Axis
 			.tickValues( hitsData.monthlyLabels )
 			.tickFormat(function(d) {
 				return d3.time.format('%x')(new Date(d))
-				});
+			});
 
 		chart.yAxis
 			.tickFormat(d3.format(',.0f'));
