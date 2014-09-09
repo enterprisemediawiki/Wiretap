@@ -5,7 +5,7 @@
 	"wiretap-hits": "Individual hits",
 	"wiretap-dailytotals": "Daily hits totals",
 	"wiretap-dailytotalschart": "Daily hits totals chart",
-	"wiretap-dailyuniques": "Unique hits (users or user-page hits?)",
+	"wiretap-dailyuniques": "Unique user/page hits",
 	"wiretap-filteruser": "filter",
 	"wiretap-filterpage": "filter",
 	"wiretap-unfilter": "Unfilter"
