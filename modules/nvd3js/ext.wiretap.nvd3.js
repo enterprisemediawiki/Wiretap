@@ -67,14 +67,17 @@ $(document).ready(function(){
 			}
 		}
 
+		rawData[0].color = "#B2ABFF";
+		
 		rawData.push( {
 			key: "7-Day Moving Average",
 			values: getMovingAverage( rawData[0].values, 7 ),
-			color: "#FF0000"
+			color: "#FFBB44"
 		} );
 		rawData.push( {
 			key: "30-Day Moving Average",
-			values: getMovingAverage( rawData[0].values, 30 )
+			values: getMovingAverage( rawData[0].values, 30 ),
+			color: "#FF0000"
 		} );
 
 		return {

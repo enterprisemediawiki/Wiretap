@@ -23,16 +23,30 @@ class SpecialWiretap extends SpecialPage {
 
 		$wgOut->addHTML( $this->getPageHeader() );
 		
-		if ($this->mMode == 'dailytotals')
+		if ($this->mMode == 'total-hits-data') {
 			$this->totals();
-		else if ( $this->mMode == 'dailytotalschart' )
-			$this->totalsChart2();
-		else if ( $this->mMode == 'uniquetotals' ) {
-			$this->uniqueTotals();
 		}
-		else
-			$this->hitsList();
+		else if ( $this->mMode == 'total-hits-chart' ) {
+			$this->totalsChart2();
+		}
 			
+		else if ( $this->mMode == 'unique-user-data' ) {
+			$this->uniqueTotals( false );
+		}
+		else if ( $this->mMode == 'unique-user-chart' ) {
+			$this->uniqueTotalsChart( false );
+		}
+		
+		else if ( $this->mMode == 'unique-user-page-data' ) {
+			$this->uniqueTotals( true );
+		}
+		else if ( $this->mMode == 'unique-user-page-chart' ) {
+			$this->uniqueTotalsChart( true );
+		}
+
+		else {
+			$this->hitsList();
+		}
 	}
 	
 	public function getPageHeader() {
@@ -41,18 +55,26 @@ class SpecialWiretap extends SpecialPage {
 		// show the names of the different views
 		$navLine = '<strong>' . wfMsg( 'wiretap-viewmode' ) . ':</strong> ';
 		
-		$links_messages = array( // pages
-			'wiretap-hits'               => '',
-			'wiretap-dailytotals'        => 'dailytotals',
-			'wiretap-dailytotalschart'   => 'dailytotalschart',
-			'wiretap-dailyuniques'       => 'uniquetotals',
-		);
-				
-		$navLinks = array();
-		foreach($links_messages as $msg => $query_param) {
-			$navLinks[] = $this->createHeaderLink($msg, $query_param);
-		}
-		$navLine .= implode(' | ', $navLinks);
+		$navLine .= "<ul>";
+
+		$navLine .= "<li>" . $this->createHeaderLink( 'wiretap-hits' ) . "</li>";
+
+		$navLine .= "<li>" . wfMessage( 'wiretap-dailytotals' )->text() 
+			. ": (" . $this->createHeaderLink( 'wiretap-rawdata', array( 'show' => 'total-hits-data' ) )
+			. ") (" . $this->createHeaderLink( 'wiretap-chart', array( 'show' => 'total-hits-chart' ) )
+			. ")</li>";
+		
+		$navLine .= "<li>" . wfMessage( 'wiretap-dailyunique-user-hits' )->text() 
+			. ": (" . $this->createHeaderLink( 'wiretap-rawdata', 'unique-user-data' )
+			. ") (" . $this->createHeaderLink( 'wiretap-chart', 'unique-user-chart' )
+			. ")</li>";
+
+		$navLine .= "<li>" . wfMessage( 'wiretap-dailyunique-user-page-hits' )->text() 
+			. ": (" . $this->createHeaderLink( 'wiretap-rawdata', 'unique-user-page-data' )
+			. ") (" . $this->createHeaderLink( 'wiretap-chart', 'unique-user-page-chart' )
+			. ")</li>";
+			
+		$navLine .= "</ul>";
 		
 		if ( $wgRequest->getVal( 'filterUser' ) || $wgRequest->getVal( 'filterPage' ) ) {
 			
@@ -64,13 +86,12 @@ class SpecialWiretap extends SpecialPage {
 
 		}
 
-		
 		$out = Xml::tags( 'p', null, $navLine ) . "\n";
 		
 		return $out;
 	}
 	
-	function createHeaderLink($msg, $query_param) {
+	function createHeaderLink($msg, $query_param = '' ) {
 	
 		$WiretapTitle = SpecialPage::getTitleFor( 'Wiretap' );
 
@@ -80,9 +101,8 @@ class SpecialWiretap extends SpecialPage {
 				wfMsg( $msg )
 			);
 		} else {
-			$show = ($query_param == '') ? array() : array( 'show' => $query_param );
 			return Xml::element( 'a',
-				array( 'href' => $WiretapTitle->getLocalURL( $show ) ),
+				array( 'href' => $WiretapTitle->getLocalURL( array( 'show' => $query_param ) ) ),
 				wfMsg( $msg )
 			);
 		}
@@ -219,55 +239,113 @@ class SpecialWiretap extends SpecialPage {
 		$wgOut->addHTML( $html );
 
 	}
-
-	public function uniqueTotals () {
-		global $wgOut;
-
-		$wgOut->setPageTitle( 'Wiretap: Daily Totals' );
-
-		$html = '<table class="wikitable"><tr><th>Date</th><th>Hits</th></tr>';
+	
+	protected function getUniqueRows ( $uniquePageHits = true, $order = "DESC" ) {
 
 		$dbr = wfGetDB( DB_SLAVE );
 
-		/*
-		SELECT
-			CONCAT(hit_year,'-',hit_month,'-',hit_day) as hit_date,
-			COUNT(DISTINCT(CONCAT(user_name,'UNIQUESEPARATOR',page_id))) as unique_page_hits
-		FROM wiretap
-		GROUP BY hit_year, hit_month, hit_day
-		ORDER BY hit_timestamp DESC
-		LIMIT 100;
-		*/
-
+		$fields = array(
+			"CONCAT(w.hit_year, '-', w.hit_month, '-', w.hit_day) AS date",
+		);
+		
+		if ( $uniquePageHits ) {
+			$fields[] = "COUNT(DISTINCT(CONCAT(w.user_name,'UNIQUESEPARATOR',w.page_id))) as hits";
+		}
+		else {
+			$fields[] = "COUNT(DISTINCT(w.user_name)) as hits";		
+		}
+		
 		$res = $dbr->select(
 			array('w' => 'wiretap'),
-			array(
-				"w.hit_year AS year", 
-				"w.hit_month AS month",
-				"w.hit_day AS day",
-				"COUNT(DISTINCT(CONCAT(w.user_name,'UNIQUESEPARATOR',w.page_id))) as unique_page_hits",
-			),
+			$fields,
 			null, // CONDITIONS? 'wiretap.hit_timestamp>20131001000000',
 			__METHOD__,
 			array(
 				// "DISTINCT",
 				"GROUP BY" => "w.hit_year, w.hit_month, w.hit_day",
-				"ORDER BY" => "w.hit_timestamp DESC",
+				"ORDER BY" => "w.hit_timestamp $order",
 				"LIMIT" => "100000",
 			),
 			null // join conditions
 		);
 
+		$output = array();
 		while( $row = $dbr->fetchRow( $res ) ) {
 		
-			list($year, $month, $day, $hits) = array($row['year'], $row['month'], $row['day'], $row['unique_page_hits']);
-			$html .= "<tr><td>$year-$month-$day</td><td>$hits</td></tr>";
+			// list($year, $month, $day, $hits) = array($row['year'], $row['month'], $row['day'], $row['hits']);
+			
+			$output[] = array( 'date' => $row['date'], 'hits' => $row['hits'] );
 		
 		}
+		
+		return $output;
+	}
+	
+	public function uniqueTotals ( $showUniquePageHits = false ) {
+		global $wgOut;
+
+		$wgOut->setPageTitle( 'Wiretap: Daily Totals' );
+
+		$html = '<table class="wikitable"><tr><th>Date</th><th>Hits</th></tr>';
+		
+		$rows = $this->getUniqueRows( $showUniquePageHits, "DESC" );
+		
+		foreach($rows as $row) {
+			$html .= "<tr><td>{$row['date']}</td><td>{$row['hits']}</td></tr>";
+		}
+		
 		$html .= "</table>";
 		
 		$wgOut->addHTML( $html );
 
+	}
+	
+	public function uniqueTotalsChart ( $showUniquePageHits = false ) {
+	
+		global $wgOut;
+
+		$wgOut->setPageTitle( 'Wiretap: Daily Unique User-Page-Hits Chart' );
+		$wgOut->addModules( 'ext.wiretap.charts.nvd3' );
+
+		$html = '<div id="wiretap-chart"><svg height="400px"></svg></div>';
+
+		$rows = $this->getUniqueRows( $showUniquePageHits, "ASC" );
+
+		$previous = null;
+
+		foreach ( $rows as $row ) {
+		
+			list($currentDateString, $hits) = array($row['date'], $row['hits']);
+
+			$current = new DateTime( $currentDateString );
+			
+			while ( $previous && $previous->modify( '+1 day' )->format( 'Y-m-d') !== $currentDateString ) {
+				$data[] = array(
+					'x' => $previous->getTimestamp() * 1000, // x value timestamp in milliseconds
+					'y' => 0, // y value = zero hits for this day
+				);
+			}
+
+			$data[] = array(
+				'x' => strtotime( $currentDateString ) * 1000, // x value time in milliseconds
+				'y' => intval( $hits ),
+			);
+
+			$previous = new DateTime( $currentDateString );
+		}
+		
+		$data = array(
+			array(
+				'key' => 'Daily Unique User-Page-Hits',
+				'values' => $data,
+			),
+		);
+
+		//$html .= "<pre>" . print_r( $data, true ) . "</pre>";
+		$html .= "<script type='text/template-json' id='wiretap-data'>" . json_encode( $data ) . "</script>";
+
+		$wgOut->addHTML( $html );
+	
 	}
 
 	public function totalsChart2 () {
