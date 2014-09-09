@@ -53,4 +53,34 @@ $wgResourceModules += array(
 
 	),
 
+	'ext.wiretap.d3.js' => $wiretapResourceTemplate + array(
+		'scripts' => array(
+			'd3js/ext.wiretap.d3.js',
+		),
+		// 'messages' => array(
+		// 	'watchanalytics-pause-visualization',
+		// 	'watchanalytics-unpause-visualization',
+		// ),
+		// 'dependencies' => array(
+		// 	'base',
+		// ),
+
+	),
+
+	'ext.wiretap.charts.nvd3' => $wiretapResourceTemplate + array(
+		'styles' => 'nvd3js/nv.d3.css',
+		'scripts' => array(
+			'nvd3js/nv.d3.js',
+			'nvd3js/ext.wiretap.nvd3.js',
+		),
+		// 'messages' => array(
+		// 	'watchanalytics-pause-visualization',
+		// 	'watchanalytics-unpause-visualization',
+		// ),
+		'dependencies' => array(
+			'ext.wiretap.d3.js',
+		),
+
+	),
+
 );

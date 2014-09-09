@@ -26,7 +26,7 @@ class SpecialWiretap extends SpecialPage {
 		if ($this->mMode == 'dailytotals')
 			$this->totals();
 		else if ( $this->mMode = 'dailytotalschart' )
-			$this->totalsChart();
+			$this->totalsChart2();
 		else
 			$this->hitsList();
 			
@@ -213,6 +213,71 @@ class SpecialWiretap extends SpecialPage {
 
 		$wgOut->addHTML( $html );
 
+	}
+
+	public function totalsChart2 () {
+		global $wgOut;
+
+		$wgOut->setPageTitle( 'Wiretap: Daily Totals Chart' );
+		$wgOut->addModules( 'ext.wiretap.charts.nvd3' );
+
+		$html = '<div id="wiretap-chart"><svg height="400px"></svg></div>';
+
+		$dbr = wfGetDB( DB_SLAVE );
+
+		$res = $dbr->select(
+			array('w' => 'wiretap'),
+			array(
+				"w.hit_year AS year", 
+				"w.hit_month AS month",
+				"w.hit_day AS day",
+				"count(*) AS num_hits",
+			),
+			null, //'w.hit_timestamp > 20140801000000', //null, // CONDITIONS? 'wiretap.hit_timestamp>20131001000000',
+			__METHOD__,
+			array(
+				"DISTINCT",
+				"GROUP BY" => "w.hit_year, w.hit_month, w.hit_day",
+				"ORDER BY" => "w.hit_year ASC, w.hit_month ASC, w.hit_day ASC",
+				"LIMIT" => "100000",
+			),
+			null // join conditions
+		);
+		$previous = null;
+
+		while( $row = $dbr->fetchRow( $res ) ) {
+		
+			list($year, $month, $day, $hits) = array($row['year'], $row['month'], $row['day'], $row['num_hits']);
+
+			$currentDateString = "$year-$month-$day";
+			$current = new DateTime( $currentDateString );
+			
+			while ( $previous && $previous->modify( '+1 day' )->format( 'Y-m-d') !== $currentDateString ) {
+				$data[] = array(
+					'x' => $previous->getTimestamp() * 1000, // x value timestamp in milliseconds
+					'y' => 0, // y value = zero hits for this day
+				);
+			}
+
+			$data[] = array(
+				'x' => strtotime( $currentDateString ) * 1000, // x value time in milliseconds
+				'y' => intval( $hits ),
+			);
+
+			$previous = new DateTime( $currentDateString );
+		}
+		
+		$data = array(
+			array(
+				'key' => 'Daily Hits',
+				'values' => $data,
+			),
+		);
+
+		//$html .= "<pre>" . print_r( $data, true ) . "</pre>";
+		$html .= "<script type='text/template-json' id='wiretap-data'>" . json_encode( $data ) . "</script>";
+
+		$wgOut->addHTML( $html );
 	}
 }
 
