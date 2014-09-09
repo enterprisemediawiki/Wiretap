@@ -55,17 +55,6 @@ $(document).ready(function(){
 	function getData () {
 
 		var rawData = JSON.parse( $('#wiretap-data').text() );
-		var weekly = [];
-		var monthly = [];
-
-		for( var i = 0; i < rawData[0].values.length; i++ ) {
-			if ( i % 7 === 0 ) {
-				weekly.push( rawData[0].values[i].x );
-			}
-			if ( i % 28 === 0 ) {
-				monthly.push( rawData[0].values[i].x );
-			}
-		}
 
 		rawData[0].color = "#B2ABFF";
 		
@@ -80,30 +69,22 @@ $(document).ready(function(){
 			color: "#FF0000"
 		} );
 
-		return {
-			dailyHits : rawData,
-			weeklyLabels : weekly,
-			monthlyLabels : monthly
-		};
+		return { dailyHits : rawData };
 
 	}
 
 
 	nv.addGraph(function() {
 
-//		var hitsData = getData();
 		window.hitsData = getData();
 		window.chart = nv.models.lineWithFocusChart();
 
 		chart.xAxis
-			// .tickFormat(d3.format(',f'));
-			.tickValues( hitsData.weeklyLabels )
 			.tickFormat(function(d) {
 				return d3.time.format('%x')(new Date(d))
 			});
 
 		chart.x2Axis
-			.tickValues( hitsData.monthlyLabels )
 			.tickFormat(function(d) {
 				return d3.time.format('%x')(new Date(d))
 			});
