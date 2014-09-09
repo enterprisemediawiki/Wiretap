@@ -1,5 +1,68 @@
+var getMovingAverage = function ( dataArray, maLength ) {
+
+    var denominator;
+
+    // initialize early datapoints
+    var avgArray = [];
+    // for( var i = 0; i < maLength; i++ ) {
+    //     avgArray.push( 0 );
+    // }
+
+    // // initialize current sum
+    var curSum = 0;
+    // for ( var i = 0; i < maLength; i++ ) {
+    //     curSum += dataArray[ i ];
+    // }
+
+
+
+    // set first "real" datapoint
+    // avgArray[ maLength - 1 ] = curSum / maLength;
+
+    for ( var i = 0; i < dataArray.length; i++ ) {
+        curSum = curSum + dataArray[ i ].y; // add in the new value to the moving sum
+        
+        if ( i - maLength >= 0 ) {
+            // subtract oldest value still "part of" moving sum
+            // if reached length of moving sum (if have 7 days in
+            // 7-day moving sum) 
+            curSum = curSum - dataArray[ i - maLength ].y;
+        }
+
+        denominator = Math.min( i + 1, maLength );
+
+        avgArray[ i ] = {
+        	x : dataArray[ i ].x,
+        	y : curSum / denominator
+        };
+
+    }
+
+    return avgArray;
+
+};
+
 $(document).ready(function(){
 
+	/**
+		{
+			dailyHits : [
+				{
+					key : "Series 1",
+					values : [
+						{ x: timestamp, y: value },
+						{ x: timestamp, y: value },
+						{ x: timestamp, y: value },
+						{ x: timestamp, y: value },
+						....
+					]
+				},
+				{ key : "Series 2", ... }
+			],
+			weeklyLabels : [unixtimestamp-milliseconds, ts, ts, ...],
+			monthlyLabels : [unixtimestamp-milliseconds, ts, ts, ...]
+		}
+	 **/
 	function getData () {
 
 		var rawData = JSON.parse( $('#wiretap-data').text() );
@@ -15,24 +78,21 @@ $(document).ready(function(){
 			}
 		}
 
+		rawData.push( {
+			key : "7-Day Moving Average",
+			values : getMovingAverage( rawData[0], 7 )
+		} );
+		rawData.push( {
+			key: "30-Day Moving Average",
+			values: getMovingAverage( rawData[0], 30 )
+		} );
+
 		return {
 			dailyHits : rawData,
 			weeklyLabels : weekly,
 			monthlyLabels : monthly
 		};
 
-		// return [
-		// 	{
-		// 		key: "Data 1",
-		// 		values: [	
-		// 			{ x: 1410282000000, y: 1 },
-		// 			{ x: 1410368400000, y: .8 },
-		// 			{ x: 1410454800000, y: .9 },
-		// 			{ x: 1410541200000, y: .5 },
-		//			...
-		// 		]
-		// 	}
-		// ];
 	}
 
 
