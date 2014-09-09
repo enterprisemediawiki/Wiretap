@@ -12,6 +12,7 @@ $wgExtensionCredits['specialpage'][] = array(
 );
 
 $wgExtensionMessagesFiles['Wiretap'] = __DIR__ . '/Wiretap.i18n.php';
+$GLOBALS['wgMessagesDirs']['Wiretap'] = __DIR__ . '/i18n';
 $wgExtensionMessagesFiles['WiretapAlias'] = __DIR__ . '/Wiretap.alias.php';
 
 $wgAutoloadClasses['Wiretap'] = __DIR__ . '/Wiretap.body.php'; // autoload body class
