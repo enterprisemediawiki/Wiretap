@@ -4,20 +4,9 @@ var getMovingAverage = function ( dataArray, maLength ) {
 
     // initialize early datapoints
     var avgArray = [];
-    // for( var i = 0; i < maLength; i++ ) {
-    //     avgArray.push( 0 );
-    // }
 
     // // initialize current sum
     var curSum = 0;
-    // for ( var i = 0; i < maLength; i++ ) {
-    //     curSum += dataArray[ i ];
-    // }
-
-
-
-    // set first "real" datapoint
-    // avgArray[ maLength - 1 ] = curSum / maLength;
 
     for ( var i = 0; i < dataArray.length; i++ ) {
         curSum = curSum + dataArray[ i ].y; // add in the new value to the moving sum
@@ -80,11 +69,11 @@ $(document).ready(function(){
 
 		rawData.push( {
 			key : "7-Day Moving Average",
-			values : getMovingAverage( rawData[0], 7 )
+			values : getMovingAverage( rawData[0].values, 7 )
 		} );
 		rawData.push( {
 			key: "30-Day Moving Average",
-			values: getMovingAverage( rawData[0], 30 )
+			values: getMovingAverage( rawData[0].values, 30 )
 		} );
 
 		return {
