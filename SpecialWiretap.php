@@ -25,8 +25,11 @@ class SpecialWiretap extends SpecialPage {
 		
 		if ($this->mMode == 'dailytotals')
 			$this->totals();
-		else if ( $this->mMode = 'dailytotalschart' )
+		else if ( $this->mMode == 'dailytotalschart' )
 			$this->totalsChart2();
+		else if ( $this->mMode == 'uniquetotals' ) {
+			$this->uniqueTotals();
+		}
 		else
 			$this->hitsList();
 			
@@ -41,6 +44,8 @@ class SpecialWiretap extends SpecialPage {
 		$links_messages = array( // pages
 			'wiretap-hits'               => '',
 			'wiretap-dailytotals'        => 'dailytotals',
+			'wiretap-dailytotalschart'   => 'dailytotalschart',
+			'wiretap-dailyuniques'       => 'uniquetotals',
 		);
 				
 		$navLinks = array();
@@ -215,6 +220,56 @@ class SpecialWiretap extends SpecialPage {
 
 	}
 
+	public function uniqueTotals () {
+		global $wgOut;
+
+		$wgOut->setPageTitle( 'Wiretap: Daily Totals' );
+
+		$html = '<table class="wikitable"><tr><th>Date</th><th>Hits</th></tr>';
+
+		$dbr = wfGetDB( DB_SLAVE );
+
+		/*
+		SELECT
+			CONCAT(hit_year,'-',hit_month,'-',hit_day) as hit_date,
+			COUNT(DISTINCT(CONCAT(user_name,'UNIQUESEPARATOR',page_id))) as unique_page_hits
+		FROM wiretap
+		GROUP BY hit_year, hit_month, hit_day
+		ORDER BY hit_timestamp DESC
+		LIMIT 100;
+		*/
+
+		$res = $dbr->select(
+			array('w' => 'wiretap'),
+			array(
+				"w.hit_year AS year", 
+				"w.hit_month AS month",
+				"w.hit_day AS day",
+				"COUNT(DISTINCT(CONCAT(w.user_name,'UNIQUESEPARATOR',w.page_id))) as unique_page_hits",
+			),
+			null, // CONDITIONS? 'wiretap.hit_timestamp>20131001000000',
+			__METHOD__,
+			array(
+				// "DISTINCT",
+				"GROUP BY" => "w.hit_year, w.hit_month, w.hit_day",
+				"ORDER BY" => "w.hit_timestamp DESC",
+				"LIMIT" => "100000",
+			),
+			null // join conditions
+		);
+
+		while( $row = $dbr->fetchRow( $res ) ) {
+		
+			list($year, $month, $day, $hits) = array($row['year'], $row['month'], $row['day'], $row['unique_page_hits']);
+			$html .= "<tr><td>$year-$month-$day</td><td>$hits</td></tr>";
+		
+		}
+		$html .= "</table>";
+		
+		$wgOut->addHTML( $html );
+
+	}
+
 	public function totalsChart2 () {
 		global $wgOut;
 
@@ -243,6 +298,7 @@ class SpecialWiretap extends SpecialPage {
 			),
 			null // join conditions
 		);
+
 		$previous = null;
 
 		while( $row = $dbr->fetchRow( $res ) ) {
@@ -279,6 +335,7 @@ class SpecialWiretap extends SpecialPage {
 
 		$wgOut->addHTML( $html );
 	}
+
 }
 
 class WiretapPager extends ReverseChronologicalPager {
