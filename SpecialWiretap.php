@@ -54,10 +54,26 @@ class SpecialWiretap extends SpecialPage {
 		
 		// show the names of the different views
 		$navLine = '<strong>' . wfMsg( 'wiretap-viewmode' ) . ':</strong> ';
+
+		$filterUser = $wgRequest->getVal( 'filterUser' );
+		$filterPage = $wgRequest->getVal( 'filterPage' );
+		
+		if ( $filterUser || $filterPage ) {
+			
+			$WiretapTitle = SpecialPage::getTitleFor( 'Wiretap' );
+			$unfilterLink = ': (' . Xml::element( 'a',
+				array( 'href' => $WiretapTitle->getLocalURL() ),
+				wfMsg( 'wiretap-unfilter' )
+			) . ')';
+
+		}
+		else {
+			$unfilterLink = '';
+		}
 		
 		$navLine .= "<ul>";
 
-		$navLine .= "<li>" . $this->createHeaderLink( 'wiretap-hits' ) . "</li>";
+		$navLine .= "<li>" . $this->createHeaderLink( 'wiretap-hits' ) . $unfilterLink . "</li>";
 
 		$navLine .= "<li>" . wfMessage( 'wiretap-dailytotals' )->text() 
 			. ": (" . $this->createHeaderLink( 'wiretap-rawdata', 'total-hits-data' )
@@ -75,16 +91,6 @@ class SpecialWiretap extends SpecialPage {
 			. ")</li>";
 			
 		$navLine .= "</ul>";
-		
-		if ( $wgRequest->getVal( 'filterUser' ) || $wgRequest->getVal( 'filterPage' ) ) {
-			
-			$WiretapTitle = SpecialPage::getTitleFor( 'Wiretap' );
-			$navLine .= ' | ' . Xml::element( 'a',
-				array( 'href' => $WiretapTitle->getLocalURL() ),
-				wfMsg( 'wiretap-unfilter' )
-			);
-
-		}
 
 		$out = Xml::tags( 'p', null, $navLine ) . "\n";
 		
@@ -284,7 +290,14 @@ class SpecialWiretap extends SpecialPage {
 	public function uniqueTotals ( $showUniquePageHits = false ) {
 		global $wgOut;
 
-		$wgOut->setPageTitle( 'Wiretap: Daily Totals' );
+		if ( $showUniquePageHits ) {
+			$pageTitleText = "Daily Unique User-Page-Hits";
+		}
+		else {
+			$pageTitleText = "Daily Unique User-Hits";
+		}
+		
+		$wgOut->setPageTitle( 'Wiretap: ' . $pageTitleText );
 
 		$html = '<table class="wikitable"><tr><th>Date</th><th>Hits</th></tr>';
 		
@@ -304,7 +317,14 @@ class SpecialWiretap extends SpecialPage {
 	
 		global $wgOut;
 
-		$wgOut->setPageTitle( 'Wiretap: Daily Unique User-Page-Hits Chart' );
+		if ( $showUniquePageHits ) {
+			$pageTitleText = "Daily Unique User-Page-Hits";
+		}
+		else {
+			$pageTitleText = "Daily Unique User-Hits";
+		}
+		
+		$wgOut->setPageTitle( "Wiretap: $pageTitleText Chart" );
 		$wgOut->addModules( 'ext.wiretap.charts.nvd3' );
 
 		$html = '<div id="wiretap-chart"><svg height="400px"></svg></div>';
@@ -336,7 +356,7 @@ class SpecialWiretap extends SpecialPage {
 		
 		$data = array(
 			array(
-				'key' => 'Daily Unique User-Page-Hits',
+				'key' => $pageTitleText,
 				'values' => $data,
 			),
 		);
