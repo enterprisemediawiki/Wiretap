@@ -14,6 +14,8 @@ class Wiretap {
 		$output->enableClientCache( false );
 		$output->addMeta( 'http:Pragma', 'no-cache' );
 
+		global $wgRequestTime, $egWiretapCurrentHit;
+
 		$now = time();
 		$hit = array(
 			'page_id' => $title->getArticleId(),
@@ -30,17 +32,29 @@ class Wiretap {
 			'page_action' => $request->getVal( 'action' ),
 			'oldid' => $request->getVal( 'oldid' ),
 			'diff' => $request->getVal( 'diff' ),
+
 		);
 
 		$hit['referer_url'] = isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : null;
 		$hit['referer_title'] = self::getRefererTitleText( $request->getVal('refererpage') );
 
+		// @TODO: this is by no means the ideal way to do this...but it'll do for now...
+		$egWiretapCurrentHit = $hit;
+
+		return true;
+
+	}
+		
+	public static function recordInDatabase (  ) { // could have param &$output
+		global $wgRequestTime, $egWiretapCurrentHit;
+
+		// calculate response time now, in the last hook (that I know of).
+		$egWiretapCurrentHit['response_time'] = round( ( microtime( true ) - $wgRequestTime ) * 1000 );
 		
 		$dbw = wfGetDB( DB_MASTER );
-		
 		$dbw->insert(
 			'wiretap',
-			$hit,
+			$egWiretapCurrentHit,
 			__METHOD__
 		);
 		return true;
@@ -48,7 +62,20 @@ class Wiretap {
 
 	public static function updateDatabase( DatabaseUpdater $updater ) {
 		global $wgDBprefix;
-		$updater->addExtensionTable( $wgDBprefix . 'wiretap', __DIR__ . '/Wiretap.sql' );
+
+		$wiretapTable = $wgDBprefix . 'wiretap';
+		$schemaDir = __DIR__ . '/schema';
+		
+		$updater->addExtensionTable(
+			$wiretapTable,
+			"$schemaDir/Wiretap.sql"
+		);
+		$updater->addExtensionField(
+			$wiretapTable,
+			'response_time',
+			"$schemaDir/patch-1-response-time.sql"
+		);
+
 		return true;
 	}
 	

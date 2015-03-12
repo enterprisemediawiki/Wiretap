@@ -1,0 +1,1 @@
+ALTER TABLE /*_*/wiretap ADD response_time INT(5) UNSIGNED NOT NULL AFTER referer_title;

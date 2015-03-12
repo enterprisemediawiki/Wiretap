@@ -15,7 +15,9 @@ CREATE TABLE IF NOT EXISTS /*_*/wiretap (
 	diff VARCHAR(10) DEFAULT NULL, /* VARCHAR required if diff=prev */
 
 	referer_url TEXT DEFAULT NULL,   /* full url of referring page */
-	referer_title VARCHAR(255) DEFAULT NULL  /* null if not a wiki page */
+	referer_title VARCHAR(255) DEFAULT NULL,  /* null if not a wiki page */
+
+	response_time INT(5) UNSIGNED NOT NULL
 
 );
 

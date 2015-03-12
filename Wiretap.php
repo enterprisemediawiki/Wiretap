@@ -22,7 +22,16 @@ $wgSpecialPages['Wiretap'] = 'SpecialWiretap'; // register special page
 
 // $wgHooks['ParserAfterTidy'][] = 'Wiretap::updateTable';
 // $wgHooks['BeforePageDisplay'][] = 'Wiretap::updateTable';
+
+// collects wiretap info from hook that provides necessary inputs
+// but does not record the information in the database
 $wgHooks['BeforeInitialize'][] = 'Wiretap::updateTable';
+
+// records the information at the latest possible time in order to
+// record the length of time required to build the page.
+$wgHooks['AfterFinalPageOutput'][] = 'Wiretap::recordInDatabase';
+
+// update database (using maintenance/update.php)
 $wgHooks['LoadExtensionSchemaUpdates'][] = 'Wiretap::updateDatabase';
 
 
