@@ -2,9 +2,9 @@
 	"wiretap": "Wiretap",
 	"wiretap-desc": "Ermöglicht das Nachvollziehen von Seitenzugriffen und stellt hierzu verschiedene Datenanzeigen bereit",
 	"wiretap-viewmode": "Ansicht",
-	"wiretap-hits": "Individuelle Zugriffe",
+	"wiretap-hits": "Zugriffe",
 	"wiretap-dailytotals": "Tagesgesamtzugriffe",
-	"wiretap-filteruser": "Filter setzen",
-	"wiretap-filterpage": "Filter setzen",
+	"wiretap-filteruser": "Benutzerfilter setzen",
+	"wiretap-filterpage": "Seitenfilter setzen",
 	"wiretap-unfilter": "Filter aufheben"
 }
