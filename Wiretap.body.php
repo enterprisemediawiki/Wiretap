@@ -48,6 +48,10 @@ class Wiretap {
 	public static function recordInDatabase (  ) { // could have param &$output
 		global $wgRequestTime, $egWiretapCurrentHit;
 
+		if ( ! $egWiretapCurrentHit ) {
+			return true; // @todo: make some error handling here. What causes this situation?
+		}
+
 		// calculate response time now, in the last hook (that I know of).
 		$egWiretapCurrentHit['response_time'] = round( ( microtime( true ) - $wgRequestTime ) * 1000 );
 		
