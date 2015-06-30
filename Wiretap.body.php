@@ -64,6 +64,7 @@ class Wiretap {
 		global $wgDBprefix;
 
 		$wiretapTable = $wgDBprefix . 'wiretap';
+		$wiretapCounterTable = $wgDBprefix . 'wiretap_counter';
 		$schemaDir = __DIR__ . '/schema';
 		
 		$updater->addExtensionTable(
@@ -75,7 +76,11 @@ class Wiretap {
 			'response_time',
 			"$schemaDir/patch-1-response-time.sql"
 		);
-
+		$updater->addExtensionTable(
+			$wiretapCounterTable,
+			"$schemaDir/patch-2-page-counter.sql"
+		);
+		
 		return true;
 	}
 	
