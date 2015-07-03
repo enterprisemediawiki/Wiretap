@@ -5,7 +5,7 @@
  * recieved in the last day/week/month/all-time.
  *
  * Usage:
- *  no parameters @todo: add a --quick parameter (to not do a full caluculation but make a best-guess)
+ *  --type: whether to record all time or hits in a period
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,27 +37,99 @@ class WiretapRecordPageHitCount extends Maintenance {
 		parent::__construct();
 		
 		$this->mDescription = "Count the recent hits for each page.";
+		$this->addOption(
+			'type',
+			'Whether to record all-time count (--type=all) or period count (default, or --type=period)',
+			false, // required (will assume period)
+			true, // with arg @todo what does this mean?
+			false // short name
+		);
 	}
 	
 	public function execute() {
-		$recorder = new WatchStateRecorder();
-		$recorder->recordAll();
 
-		if ( $quick ) {
+		global $egWiretapCounterPeriod;
 
+		$type = $this->getOption( 'type', false );
+		if ( ! $type ) {
+			$type = 'period';
+		}
+		else if ( ! in_array( $type, array( 'period', 'all' ) ) ) {
+			$this->output( "\n \"type\" option must be set to either \"all\" or \"period\". \n" );
+		}
+
+		$egWiretapCounterPeriod = 1000;
+		date_default_timezone_set("UTC"); 
+		$ts = new MWTimestamp( date( 'YmdHis', strtotime( "now - $egWiretapCounterPeriod days" ) ) );
+
+		$readConditions = array( 'page_id != 0' );
+
+		if ( $type == 'all' ) {
+			$writeTable = array( 'c' => 'wiretap_counter_alltime' );
 		}
 		else {
-
-			SELECT 
-
-			FROM wiretap
-
+			$writeTable = array( 'c' => 'wiretap_counter_period' );
+			$readConditions[] = "hit_timestamp > $ts";
 		}
 
+		$dbw = wfGetDB( DB_MASTER );
+
+		// get recent hits
+		// $res = $dbr->select(
+		// 	array('w' => 'wiretap'),
+		// 	array(
+		// 		"w.page_id", 
+		// 		"COUNT(*) AS total_hits",
+		// 		"COUNT( DISTINCT user_name ) as unique_hits",
+		// 	),
+		// 	$readConditions,
+		// 	__METHOD__,
+		// 	array(
+		// 		"GROUP BY" => "w.page_id",
+		// 		"ORDER BY" => "w.page_id ASC",
+		// 	),
+		// 	null // join conditions
+		// );
+
+		// clear the table
+		$res = $dbw->delete(
+			$writeTable['c'],
+			array( 'page_id > 0' ), // conditions = none; delete everything
+			__METHOD__
+		);
+
+		// query wiretap table, repopulate $writeTable
+		$res = $dbw->insertSelect(
+			$writeTable['c'],
+			array( 'w' => 'wiretap' ),
+			array(
+				// 'dest' => 'source'
+				'page_id' => 'page_id',
+				'count' => 'COUNT(*) AS total_hits',
+				'count_unique' => 'COUNT( DISTINCT user_name ) AS unique_hits',
+			),
+			$readConditions,
+			__METHOD__,
+			array(), // insert options
+			array( // select options
+				"GROUP BY" => "page_id",
+				"ORDER BY" => "page_id ASC",
+			) 
+		);
+
+		# Perform replace
+		# Note that multi-row replace is very efficient for MySQL but may be inefficient for
+		# some other DBMSes, mostly due to poor simulation by us
+		// $dbw->replace(
+		// 	'wiretap_counter',
+		// 	array( array( 'page_id', 'count', 'wl_title' ) ),
+		// 	$values,
+		// 	__METHOD__
+		// );
 
 		$this->output( "\n Finished recording page traffic. \n" );
 	}
 }
 
-$maintClass = "WatchAnalyticsRecordState";
+$maintClass = "WiretapRecordPageHitCount";
 require_once( DO_MAINTENANCE );
