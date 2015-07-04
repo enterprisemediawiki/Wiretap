@@ -97,3 +97,14 @@ $wgResourceModules += array(
 	),
 
 );
+
+
+// for selecting a short period over which to count hits to pages
+// set to 1 to count over the last day, 4 over the last 4 days, etc
+$egWiretapCounterPeriod = 30;
+
+// use the all-time counter by default
+$egWiretapAddToAlltimeCounter = true;
+
+// don't use the period counter by default
+$egWiretapAddToPeriodCounter = false;

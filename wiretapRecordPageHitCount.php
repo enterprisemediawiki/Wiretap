@@ -58,7 +58,6 @@ class WiretapRecordPageHitCount extends Maintenance {
 			$this->output( "\n \"type\" option must be set to either \"all\" or \"period\". \n" );
 		}
 
-		$egWiretapCounterPeriod = 1000;
 		date_default_timezone_set("UTC"); 
 		$ts = new MWTimestamp( date( 'YmdHis', strtotime( "now - $egWiretapCounterPeriod days" ) ) );
 
@@ -73,23 +72,6 @@ class WiretapRecordPageHitCount extends Maintenance {
 		}
 
 		$dbw = wfGetDB( DB_MASTER );
-
-		// get recent hits
-		// $res = $dbr->select(
-		// 	array('w' => 'wiretap'),
-		// 	array(
-		// 		"w.page_id", 
-		// 		"COUNT(*) AS total_hits",
-		// 		"COUNT( DISTINCT user_name ) as unique_hits",
-		// 	),
-		// 	$readConditions,
-		// 	__METHOD__,
-		// 	array(
-		// 		"GROUP BY" => "w.page_id",
-		// 		"ORDER BY" => "w.page_id ASC",
-		// 	),
-		// 	null // join conditions
-		// );
 
 		// clear the table
 		$res = $dbw->delete(
@@ -116,16 +98,6 @@ class WiretapRecordPageHitCount extends Maintenance {
 				"ORDER BY" => "page_id ASC",
 			) 
 		);
-
-		# Perform replace
-		# Note that multi-row replace is very efficient for MySQL but may be inefficient for
-		# some other DBMSes, mostly due to poor simulation by us
-		// $dbw->replace(
-		// 	'wiretap_counter',
-		// 	array( array( 'page_id', 'count', 'wl_title' ) ),
-		// 	$values,
-		// 	__METHOD__
-		// );
 
 		$this->output( "\n Finished recording page traffic. \n" );
 	}
