@@ -57,13 +57,57 @@ class Wiretap {
 			$egWiretapCurrentHit,
 			__METHOD__
 		);
+
+		global $egWiretapAddToPeriodCounter, $egWiretapAddToAlltimeCounter;
+
+		if ( $egWiretapAddToAlltimeCounter ) {
+			self::upsertHit( $egWiretapCurrentHit['page_id'], 'all' );
+		}
+		
+		if ( $egWiretapAddToPeriodCounter ) {
+			self::upsertHit( $egWiretapCurrentHit['page_id'], 'period' );
+		}
+
 		return true;
+	}
+
+	public static function upsertHit ( $pageId, $type='all' ) {
+
+		if ( $type === 'period' ) {
+			$table = 'wiretap_counter_period';
+		}
+		else if ( $type === 'all' ) {
+			$table = 'wiretap_counter_alltime';
+		}
+		else return;
+
+		$dbw = wfGetDB( DB_MASTER );
+		$dbw->upsert(
+			$table,
+			array(
+				'page_id' => $pageId,
+				'count' => 1,
+				'count_unique' => 1,
+			),
+			array( 'page_id' ),
+			array(
+				'count = count + 1',
+				// does not guess this is a new unique hit
+				// need to run maint script for that
+				// 'count_unique = count_unique + 1',
+			),
+			__METHOD__ 
+		);
+
+		return;
+
 	}
 
 	public static function updateDatabase( DatabaseUpdater $updater ) {
 		global $wgDBprefix;
 
 		$wiretapTable = $wgDBprefix . 'wiretap';
+		$wiretapCounterTable = $wgDBprefix . 'wiretap_counter_period';
 		$schemaDir = __DIR__ . '/schema';
 		
 		$updater->addExtensionTable(
@@ -75,7 +119,11 @@ class Wiretap {
 			'response_time',
 			"$schemaDir/patch-1-response-time.sql"
 		);
-
+		$updater->addExtensionTable(
+			$wiretapCounterTable,
+			"$schemaDir/patch-2-page-counter.sql"
+		);
+		
 		return true;
 	}
 	
