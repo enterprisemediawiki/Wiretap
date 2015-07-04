@@ -107,7 +107,7 @@ class Wiretap {
 		global $wgDBprefix;
 
 		$wiretapTable = $wgDBprefix . 'wiretap';
-		$wiretapCounterTable = $wgDBprefix . 'wiretap_counter';
+		$wiretapCounterTable = $wgDBprefix . 'wiretap_counter_period';
 		$schemaDir = __DIR__ . '/schema';
 		
 		$updater->addExtensionTable(
