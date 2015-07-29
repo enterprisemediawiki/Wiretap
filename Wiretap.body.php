@@ -48,6 +48,10 @@ class Wiretap {
 	public static function recordInDatabase (  ) { // could have param &$output
 		global $wgRequestTime, $egWiretapCurrentHit;
 
+		if ( ! isset( $wgRequestTime ) || ! isset( $wgRequestTime['page_id'] ) ) {
+			return true; // for whatever reason the poorly-named "updateTable" method was not called; abort.
+		}
+
 		// calculate response time now, in the last hook (that I know of).
 		$egWiretapCurrentHit['response_time'] = round( ( microtime( true ) - $wgRequestTime ) * 1000 );
 		
