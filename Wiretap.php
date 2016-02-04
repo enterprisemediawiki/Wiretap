@@ -111,3 +111,6 @@ $egWiretapAddToAlltimeCounter = true;
 
 // don't use the period counter by default
 $egWiretapAddToPeriodCounter = false;
+
+// of course we want counters! why else have the extension!
+$wgDisableCounters = false;
