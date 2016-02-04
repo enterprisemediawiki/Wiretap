@@ -3,6 +3,7 @@
 class Wiretap {
 
 	static $referers = null;
+	static $called = false;
 
 	/**
 	 *
@@ -182,18 +183,20 @@ class Wiretap {
 
 	// taken from Extension:HitCounter, which I think took it from MW core pre 1.25
 	public static function onSkinTemplateOutputPageBeforeExec( SkinTemplate &$skin, QuickTemplate &$tpl ) {
-		 global $wgDisableCounters;
+		global $wgDisableCounters;
 
-		 /* Without this check two lines are added to the page. */
-		 static $called = false;
-		 if ( $called ) {
-			  return;
-		 }
-		 $called = true;
+		/* Without this check two lines are added to the page. */
+		if ( self::$called ) {
+			return;
+		}
+		self::$called = true;
 
-		 if ( ! $wgDisableCounters ) {
-  		 $footer = $tpl->get( 'footerlinks' );
-			if ( isset( $footer['info'] ) && is_array( $footer['info'] ) ) {
+		if ( ! $wgDisableCounters ) {
+			$footer = $tpl->get( 'footerlinks' );
+			if ( isset( $footer['info'] )
+				&& is_array( $footer['info'] )
+				&& ! in_array( 'viewcount', $footer['info'] )
+			) {
 				// 'viewcount' goes after 'lastmod', we'll just assume
 				// 'viewcount' is the 0th item
 				array_splice( $footer['info'], 1, 0, 'viewcount' );
@@ -204,32 +207,67 @@ class Wiretap {
 			if ( $viewcount ) {
 				wfDebugLog(
 					"Wiretap",
-					"Got viewcount=$viewcount and putting in page"
+					"Got viewcount and putting in page"
 				);
-				$tpl->set( 'viewcount', $skin->msg( 'wiretapviewcount' )->
-					numParams( $viewcount )->parse() );
+				$tpl->set(
+					'viewcount',
+					$skin->msg( 'wiretap-viewcount' )->numParams(
+						$viewcount->page + $viewcount->redirect,
+						$viewcount->redirect
+					)->parse()
+				);
 			}
 		}
 	}
 
 	// eventually add a $period param allowing to specify a
 	static public function getCount ( Title $title ) {
+
+		$counts = (object)array( 'page' => 0, 'redirect' => 0 );
+
+		$id = $title->getArticleID();
+		if ( ! $id ) {
+			return $counts;
+		}
+
+		$findIDs = array( $id );
+		$redirects = $title->getRedirectsHere();
+		foreach( $redirects as $r ) {
+			$findIDs[] = $r->getArticleID();
+		}
+
 		$dbr = wfGetDB( DB_SLAVE );
 		$result = $dbr->select(
-			array( 'w' => 'wiretap_counter_alltime', 'leg' => 'wiretap_legacy' ),
-			array( 'total_count' => 'IFNULL( legacy_count, 0 )  + IFNULL( w.count, 0 )' ),
-			array( 'w.page_id' => $title->getArticleID() ),
+			array(
+				'w' => 'wiretap_counter_alltime',
+				'leg' => 'wiretap_legacy'
+			),
+			array(
+				'id' => 'w.page_id',
+				'legacy_counter' => 'legacy_counter',
+				'wiretap_counter' => 'w.count'
+			),
+			array( 'w.page_id' => $findIDs ),
 			__METHOD__,
 			null,
-			array( 'wiretap_legacy' => array( 'LEFT JOIN', 'leg.legacy_id=w.page_id' ) )
+			array(
+				'leg' => array( 'LEFT JOIN', 'leg.legacy_id = w.page_id' )
+			)
 		);
 
-		$page = $result->fetchObject();
-
-		if ( $page ) {
-			return $page->total_count;
+		// $pageHits = 0;
+		// $redirectHits = 0;
+		while( $page = $result->fetchObject() ) {
+			$total = intval( $page->legacy_counter ) + intval( $page->wiretap_counter );
+			if ( $page->id == $id ) {
+				$counts->page = $total;
+			}
+			else {
+				$counts->redirect += $total;
+			}
 		}
-		return 0;
+
+		return $counts;
 	}
 
 }
