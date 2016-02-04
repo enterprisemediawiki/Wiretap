@@ -18,7 +18,7 @@ class Wiretap {
 
 		$now = time();
 		$hit = array(
-			'page_id' => $title->getArticleId(),
+			'page_id' => $title->getArticleID(),
 			'page_name' => $title->getFullText(),
 			'user_name' => $user->getName(),
 			'hit_timestamp' => wfTimestampNow(),
@@ -140,9 +140,9 @@ class Wiretap {
 	 *  Make better use of: $wgScript, $wgScriptPath, $wgArticlePath;
 	 *
 	 *  Other recommendations:
-	 *    wfSuppressWarnings();
-	 *    $a = parse_url( $url );
-	 *    wfRestoreWarnings();
+	 *	 wfSuppressWarnings();
+	 *	 $a = parse_url( $url );
+	 *	 wfRestoreWarnings();
 	 **/
 	public static function getRefererTitleText ( $refererpage=null ) {
 
@@ -178,6 +178,58 @@ class Wiretap {
 		else
 			return false;
 
+	}
+
+	// taken from Extension:HitCounter, which I think took it from MW core pre 1.25
+	public static function onSkinTemplateOutputPageBeforeExec( SkinTemplate &$skin, QuickTemplate &$tpl ) {
+		 global $wgDisableCounters;
+
+		 /* Without this check two lines are added to the page. */
+		 static $called = false;
+		 if ( $called ) {
+			  return;
+		 }
+		 $called = true;
+
+		 if ( ! $wgDisableCounters ) {
+  		 $footer = $tpl->get( 'footerlinks' );
+			if ( isset( $footer['info'] ) && is_array( $footer['info'] ) ) {
+				// 'viewcount' goes after 'lastmod', we'll just assume
+				// 'viewcount' is the 0th item
+				array_splice( $footer['info'], 1, 0, 'viewcount' );
+				$tpl->set( 'footerlinks', $footer );
+			}
+
+			$viewcount = Wiretap::getCount( $skin->getTitle() );
+			if ( $viewcount ) {
+				wfDebugLog(
+					"HitCounters",
+					"Got viewcount=$viewcount and putting in page"
+				);
+				$tpl->set( 'viewcount', $skin->msg( 'viewcount' )->
+					numParams( $viewcount )->parse() );
+			}
+		}
+	}
+
+	// eventually add a $period param allowing to specify a
+	static public function getCount ( Title $title ) {
+		$dbr = wfGetDB( DB_SLAVE );
+		$result = $dbr->select(
+			array( 'w' => 'wiretap_counter_alltime', 'leg' => 'wiretap_legacy' ),
+			array( 'total_count' => 'legacy_count + w.count' ),
+			array( 'w.page_id' => $title->getArticleID() ),
+			__METHOD__,
+			null,
+			array( 'wiretap_legacy' => array( 'LEFT JOIN', 'legacy_id=page_id' ) )
+		);
+
+		$page = $result->fetchObject();
+
+		if ( $page ) {
+			return $page->total_count;
+		}
+		return 0;
 	}
 
 }

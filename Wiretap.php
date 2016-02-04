@@ -31,6 +31,9 @@ $wgHooks['BeforeInitialize'][] = 'Wiretap::updateTable';
 // record the length of time required to build the page.
 $wgHooks['AfterFinalPageOutput'][] = 'Wiretap::recordInDatabase';
 
+// Add wiretap view counter to bottom of page
+$wgHooks['SkinTemplateOutputPageBeforeExec'][] = 'Wiretap::onSkinTemplateOutputPageBeforeExec';
+
 // update database (using maintenance/update.php)
 $wgHooks['LoadExtensionSchemaUpdates'][] = 'Wiretap::updateDatabase';
 
