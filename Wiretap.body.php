@@ -203,10 +203,10 @@ class Wiretap {
 			$viewcount = Wiretap::getCount( $skin->getTitle() );
 			if ( $viewcount ) {
 				wfDebugLog(
-					"HitCounters",
+					"Wiretap",
 					"Got viewcount=$viewcount and putting in page"
 				);
-				$tpl->set( 'viewcount', $skin->msg( 'viewcount' )->
+				$tpl->set( 'viewcount', $skin->msg( 'wiretapviewcount' )->
 					numParams( $viewcount )->parse() );
 			}
 		}
@@ -217,11 +217,11 @@ class Wiretap {
 		$dbr = wfGetDB( DB_SLAVE );
 		$result = $dbr->select(
 			array( 'w' => 'wiretap_counter_alltime', 'leg' => 'wiretap_legacy' ),
-			array( 'total_count' => 'legacy_count + w.count' ),
+			array( 'total_count' => 'IFNULL( legacy_count, 0 )  + IFNULL( w.count, 0 )' ),
 			array( 'w.page_id' => $title->getArticleID() ),
 			__METHOD__,
 			null,
-			array( 'wiretap_legacy' => array( 'LEFT JOIN', 'legacy_id=page_id' ) )
+			array( 'wiretap_legacy' => array( 'LEFT JOIN', 'leg.legacy_id=w.page_id' ) )
 		);
 
 		$page = $result->fetchObject();

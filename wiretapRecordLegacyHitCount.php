@@ -92,6 +92,9 @@ class WiretapRecordLegacyHitCount extends Maintenance {
 
 		$arrayForDatabase = array();
 		foreach( $legacyCounter as $id => $count ) {
+			if ( $count == 0 ) {
+				continue; // don't bother recording pages that have zero hits
+			}
 			$arrayForDatabase[] = array(
 				'legacy_id' => $id,
 				'legacy_counter' => $count
