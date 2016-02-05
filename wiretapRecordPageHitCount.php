@@ -48,7 +48,7 @@ class WiretapRecordPageHitCount extends Maintenance {
 
 	public function execute() {
 
-		global $egWiretapCounterPeriod;
+		global $wgWiretapCounterPeriod;
 
 		$type = $this->getOption( 'type', false );
 		if ( ! $type ) {
@@ -65,7 +65,7 @@ class WiretapRecordPageHitCount extends Maintenance {
 		}
 		else {
 			date_default_timezone_set("UTC");
-			$ts = new MWTimestamp( date( 'YmdHis', strtotime( "now - $egWiretapCounterPeriod days" ) ) );
+			$ts = new MWTimestamp( date( 'YmdHis', strtotime( "now - $wgWiretapCounterPeriod days" ) ) );
 			$ts = $ts->format("YmdHis");
 			$this->output( "\nRecording hits since $ts\n\n" );
 

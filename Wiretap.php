@@ -1,5 +1,18 @@
 <?php
 
+if ( function_exists( 'wfLoadExtension' ) ) {
+	wfLoadExtension( 'Wiretap' );
+	// Keep i18n globals so mergeMessageFileList.php doesn't break
+	$wgMessagesDirs['Wiretap'] = __DIR__ . '/i18n';
+	$wgExtensionMessagesFiles['WiretapAlias'] = __DIR__ . '/Wiretap.alias.php';
+	wfWarn(
+		'Deprecated PHP entry point used for Wiretap extension. Please use wfLoadExtension instead, ' .
+		'see https://www.mediawiki.org/wiki/Extension_registration for more details.'
+	);
+	return;
+}
+// else, use the old method of extension registry...
+
 $wgExtensionCredits['specialpage'][] = array(
 	'path' => __FILE__,
 	'name' => 'Wiretap',
@@ -104,13 +117,13 @@ $wgResourceModules += array(
 
 // for selecting a short period over which to count hits to pages
 // set to 1 to count over the last day, 4 over the last 4 days, etc
-$egWiretapCounterPeriod = 30;
+$wgWiretapCounterPeriod = 30;
 
 // use the all-time counter by default
-$egWiretapAddToAlltimeCounter = true;
+$wgWiretapAddToAlltimeCounter = true;
 
 // don't use the period counter by default
-$egWiretapAddToPeriodCounter = false;
+$wgWiretapAddToPeriodCounter = false;
 
 // of course we want counters! why else have the extension!
 $wgDisableCounters = false;
