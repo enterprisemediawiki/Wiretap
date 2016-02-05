@@ -1,0 +1,69 @@
+{
+	"name": "Wiretap",
+	"version": 0.1,
+	"author": [
+		"[https://www.mediawiki.org/wiki/User:Jamesmontalvo3 James Montalvo]"
+	],
+	"url": "https://www.mediawiki.org/wiki/Extension:Wiretap",
+	"descriptionmsg": "wiretap-desc",
+	"type": "specialpage",
+	"SpecialPages": {
+		"Wiretap": "SpecialWiretap"
+	},
+	"ExtensionMessagesFiles": {
+		"Wiretap": "Wiretap.i18n.php",
+		"WiretapAlias": "Wiretap.alias.php"
+	},
+	"AutoloadClasses": {
+		"Wiretap": "Wiretap.body.php",
+		"SpecialWiretap": "SpecialWiretap.php"
+	},
+	"ResourceModules": {
+		"ext.wiretap.charts": {
+			"styles": "charts/ext.wiretap.charts.css",
+			"scripts": [
+				"charts/Chart.js",
+				"charts/ext.wiretap.charts.js"
+			]
+		},
+		"ext.wiretap.d3.js": {
+			"scripts": [
+				"d3js/ext.wiretap.d3.js"
+			]
+		},
+		"ext.wiretap.charts.nvd3": {
+			"styles": [
+				"nvd3js/nv.d3.css",
+				"nvd3js/ext.wiretap.nvd3.css"
+			],
+			"scripts": [
+				"nvd3js/nv.d3.js",
+				"nvd3js/ext.wiretap.nvd3.js"
+			],
+			"dependencies": [
+				"ext.wiretap.d3.js"
+			]
+		}
+	},
+	"ResourceFileModulePaths": {
+		"localBasePath": "modules",
+		"remoteExtPath": "Wiretap/modules"
+	},
+	"Hooks": {
+		"BeforeInitialize": [
+			"Wiretap::updateTable"
+		],
+		"AfterFinalPageOutput": [
+			"Wiretap::recordInDatabase"
+		],
+		"SkinTemplateOutputPageBeforeExec": [
+			"Wiretap::onSkinTemplateOutputPageBeforeExec"
+		],
+		"LoadExtensionSchemaUpdates": [
+			"Wiretap::updateDatabase"
+		]
+	},
+	"config": {
+		"DisableCounters": false
+	}
+}
