@@ -3,14 +3,15 @@
 class Wiretap {
 
 	static $referers = null;
-	
+	static $called = false;
+
 	/**
 	 *
 	 *
 	 *
 	 **/
 	public static function updateTable( &$title, &$article, &$output, &$user, $request, $mediaWiki ) {
-		
+
 		$output->enableClientCache( false );
 		$output->addMeta( 'http:Pragma', 'no-cache' );
 
@@ -18,11 +19,11 @@ class Wiretap {
 
 		$now = time();
 		$hit = array(
-			'page_id' => $title->getArticleId(),
+			'page_id' => $title->getArticleID(),
 			'page_name' => $title->getFullText(),
 			'user_name' => $user->getName(),
 			'hit_timestamp' => wfTimestampNow(),
-			
+
 			'hit_year' => date('Y',$now),
 			'hit_month' => date('m',$now),
 			'hit_day' => date('d',$now),
@@ -44,7 +45,7 @@ class Wiretap {
 		return true;
 
 	}
-		
+
 	public static function recordInDatabase (  ) { // could have param &$output
 		global $wgRequestTime, $egWiretapCurrentHit;
 
@@ -54,7 +55,7 @@ class Wiretap {
 
 		// calculate response time now, in the last hook (that I know of).
 		$egWiretapCurrentHit['response_time'] = round( ( microtime( true ) - $wgRequestTime ) * 1000 );
-		
+
 		$dbw = wfGetDB( DB_MASTER );
 		$dbw->insert(
 			'wiretap',
@@ -67,7 +68,7 @@ class Wiretap {
 		if ( $egWiretapAddToAlltimeCounter ) {
 			self::upsertHit( $egWiretapCurrentHit['page_id'], 'all' );
 		}
-		
+
 		if ( $egWiretapAddToPeriodCounter ) {
 			self::upsertHit( $egWiretapCurrentHit['page_id'], 'period' );
 		}
@@ -100,7 +101,7 @@ class Wiretap {
 				// need to run maint script for that
 				// 'count_unique = count_unique + 1',
 			),
-			__METHOD__ 
+			__METHOD__
 		);
 
 		return;
@@ -112,8 +113,9 @@ class Wiretap {
 
 		$wiretapTable = $wgDBprefix . 'wiretap';
 		$wiretapCounterTable = $wgDBprefix . 'wiretap_counter_period';
+		$wiretapLegacyTable = $wgDBprefix . 'wiretap_legacy';
 		$schemaDir = __DIR__ . '/schema';
-		
+
 		$updater->addExtensionTable(
 			$wiretapTable,
 			"$schemaDir/Wiretap.sql"
@@ -127,53 +129,145 @@ class Wiretap {
 			$wiretapCounterTable,
 			"$schemaDir/patch-2-page-counter.sql"
 		);
-		
+		$updater->addExtensionTable(
+			$wiretapLegacyTable,
+			"$schemaDir/patch-3-legacy-counter.sql"
+		);
 		return true;
 	}
-	
+
 	/**
 	 *	See WebRequest::getPathInfo() for ideas/info
 	 *  Make better use of: $wgScript, $wgScriptPath, $wgArticlePath;
 	 *
 	 *  Other recommendations:
-	 *    wfSuppressWarnings();
-	 *    $a = parse_url( $url );
-	 *    wfRestoreWarnings();
+	 *	 wfSuppressWarnings();
+	 *	 $a = parse_url( $url );
+	 *	 wfRestoreWarnings();
 	 **/
 	public static function getRefererTitleText ( $refererpage=null ) {
-		
+
 		// global $egWiretapReferers;
 		global $wgScriptPath;
-	
+
 		if ( $refererpage )
 			return $refererpage;
 		else if ( ! isset($_SERVER["HTTP_REFERER"]) )
 			return null;
-	
+
 		$wikiBaseUrl = WebRequest::detectProtocol() . '://' . $_SERVER['HTTP_HOST'] . $wgScriptPath;
-		
-		// if referer URL starts 
+
+		// if referer URL starts
 		if ( strpos($_SERVER["HTTP_REFERER"], $wikiBaseUrl) === 0 ) {
-			
+
 			$questPos = strpos( $_SERVER['HTTP_REFERER'], '?' );
 			$hashPos = strpos( $_SERVER['HTTP_REFERER'], '#' );
-			
+
 			if ($hashPos !== false) {
 				$queryStringLength = $hashPos - $questPos;
 				$queryString = substr($_SERVER['HTTP_REFERER'], $questPos+1, $queryStringLength);
 			} else {
 				$queryString = substr($_SERVER['HTTP_REFERER'], $questPos+1);
 			}
-						
+
 			$query = array();
 			parse_str( $queryString, $query );
 
 			return isset($query['title']) ? $query['title'] : false;
-		
+
 		}
 		else
 			return false;
-		
+
 	}
-	
+
+	// taken from Extension:HitCounter, which I think took it from MW core pre 1.25
+	public static function onSkinTemplateOutputPageBeforeExec( SkinTemplate &$skin, QuickTemplate &$tpl ) {
+		global $wgDisableCounters;
+
+		/* Without this check two lines are added to the page. */
+		if ( self::$called ) {
+			return;
+		}
+		self::$called = true;
+
+		if ( ! $wgDisableCounters ) {
+			$footer = $tpl->get( 'footerlinks' );
+			if ( isset( $footer['info'] )
+				&& is_array( $footer['info'] )
+				&& ! in_array( 'viewcount', $footer['info'] )
+			) {
+				// 'viewcount' goes after 'lastmod', we'll just assume
+				// 'viewcount' is the 0th item
+				array_splice( $footer['info'], 1, 0, 'viewcount' );
+				$tpl->set( 'footerlinks', $footer );
+			}
+
+			$viewcount = Wiretap::getCount( $skin->getTitle() );
+			if ( $viewcount ) {
+				wfDebugLog(
+					"Wiretap",
+					"Got viewcount and putting in page"
+				);
+				$tpl->set(
+					'viewcount',
+					$skin->msg( 'wiretap-viewcount' )->numParams(
+						$viewcount->page + $viewcount->redirect,
+						$viewcount->redirect
+					)->parse()
+				);
+			}
+		}
+	}
+
+	// eventually add a $period param allowing to specify a
+	static public function getCount ( Title $title ) {
+
+		$counts = (object)array( 'page' => 0, 'redirect' => 0 );
+
+		$id = $title->getArticleID();
+		if ( ! $id ) {
+			return $counts;
+		}
+
+		$findIDs = array( $id );
+		$redirects = $title->getRedirectsHere();
+		foreach( $redirects as $r ) {
+			$findIDs[] = $r->getArticleID();
+		}
+
+		$dbr = wfGetDB( DB_SLAVE );
+		$result = $dbr->select(
+			array(
+				'w' => 'wiretap_counter_alltime',
+				'leg' => 'wiretap_legacy'
+			),
+			array(
+				'id' => 'w.page_id',
+				'legacy_counter' => 'legacy_counter',
+				'wiretap_counter' => 'w.count'
+			),
+			array( 'w.page_id' => $findIDs ),
+			__METHOD__,
+			null,
+			array(
+				'leg' => array( 'LEFT JOIN', 'leg.legacy_id = w.page_id' )
+			)
+		);
+
+		// $pageHits = 0;
+		// $redirectHits = 0;
+		while( $page = $result->fetchObject() ) {
+			$total = intval( $page->legacy_counter ) + intval( $page->wiretap_counter );
+			if ( $page->id == $id ) {
+				$counts->page = $total;
+			}
+			else {
+				$counts->redirect += $total;
+			}
+		}
+
+		return $counts;
+	}
+
 }

@@ -31,6 +31,9 @@ $wgHooks['BeforeInitialize'][] = 'Wiretap::updateTable';
 // record the length of time required to build the page.
 $wgHooks['AfterFinalPageOutput'][] = 'Wiretap::recordInDatabase';
 
+// Add wiretap view counter to bottom of page
+$wgHooks['SkinTemplateOutputPageBeforeExec'][] = 'Wiretap::onSkinTemplateOutputPageBeforeExec';
+
 // update database (using maintenance/update.php)
 $wgHooks['LoadExtensionSchemaUpdates'][] = 'Wiretap::updateDatabase';
 
@@ -108,3 +111,6 @@ $egWiretapAddToAlltimeCounter = true;
 
 // don't use the period counter by default
 $egWiretapAddToPeriodCounter = false;
+
+// of course we want counters! why else have the extension!
+$wgDisableCounters = false;

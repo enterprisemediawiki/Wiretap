@@ -11,5 +11,6 @@
 	"wiretap-filterpage": "filter",
 	"wiretap-unfilter": "Unfilter",
 	"wiretap-rawdata": "Data",
-	"wiretap-chart": "Chart"
+	"wiretap-chart": "Chart",
+	"wiretap-viewcount": "This page has been viewed $1 {{PLURAL:$1|time|times}} ($2 via redirect)"
 }

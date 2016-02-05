@@ -32,10 +32,10 @@ $basePath = getenv( 'MW_INSTALL_PATH' ) !== false ? getenv( 'MW_INSTALL_PATH' ) 
 require_once $basePath . '/maintenance/Maintenance.php';
 
 class WiretapRecordPageHitCount extends Maintenance {
-	
+
 	public function __construct() {
 		parent::__construct();
-		
+
 		$this->mDescription = "Count the recent hits for each page.";
 		$this->addOption(
 			'type',
@@ -45,7 +45,7 @@ class WiretapRecordPageHitCount extends Maintenance {
 			false // short name
 		);
 	}
-	
+
 	public function execute() {
 
 		global $egWiretapCounterPeriod;
@@ -58,15 +58,17 @@ class WiretapRecordPageHitCount extends Maintenance {
 			$this->output( "\n \"type\" option must be set to either \"all\" or \"period\". \n" );
 		}
 
-		date_default_timezone_set("UTC"); 
-		$ts = new MWTimestamp( date( 'YmdHis', strtotime( "now - $egWiretapCounterPeriod days" ) ) );
-
 		$readConditions = array( 'page_id != 0' );
 
 		if ( $type == 'all' ) {
 			$writeTable = array( 'c' => 'wiretap_counter_alltime' );
 		}
 		else {
+			date_default_timezone_set("UTC");
+			$ts = new MWTimestamp( date( 'YmdHis', strtotime( "now - $egWiretapCounterPeriod days" ) ) );
+			$ts = $ts->format("YmdHis");
+			$this->output( "\nRecording hits since $ts\n\n" );
+
 			$writeTable = array( 'c' => 'wiretap_counter_period' );
 			$readConditions[] = "hit_timestamp > $ts";
 		}
@@ -76,7 +78,7 @@ class WiretapRecordPageHitCount extends Maintenance {
 		// clear the table
 		$res = $dbw->delete(
 			$writeTable['c'],
-			array( 'page_id > 0' ), // conditions = none; delete everything
+			array( 'page_id > -1' ), // conditions = none; delete everything
 			__METHOD__
 		);
 
@@ -96,7 +98,7 @@ class WiretapRecordPageHitCount extends Maintenance {
 			array( // select options
 				"GROUP BY" => "page_id",
 				"ORDER BY" => "page_id ASC",
-			) 
+			)
 		);
 
 		$this->output( "\n Finished recording page traffic. \n" );
