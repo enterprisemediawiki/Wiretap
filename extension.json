@@ -64,6 +64,9 @@
 		]
 	},
 	"config": {
-		"DisableCounters": false
+		"DisableCounters": false,
+		"WiretapCounterPeriod": 30,
+		"WiretapAddToAlltimeCounter": true,
+		"WiretapAddToPeriodCounter": false
 	}
 }

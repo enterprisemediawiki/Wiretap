@@ -63,13 +63,13 @@ class Wiretap {
 			__METHOD__
 		);
 
-		global $egWiretapAddToPeriodCounter, $egWiretapAddToAlltimeCounter;
+		global $wgWiretapAddToPeriodCounter, $wgWiretapAddToAlltimeCounter;
 
-		if ( $egWiretapAddToAlltimeCounter ) {
+		if ( $wgWiretapAddToAlltimeCounter ) {
 			self::upsertHit( $egWiretapCurrentHit['page_id'], 'all' );
 		}
 
-		if ( $egWiretapAddToPeriodCounter ) {
+		if ( $wgWiretapAddToPeriodCounter ) {
 			self::upsertHit( $egWiretapCurrentHit['page_id'], 'period' );
 		}
 
