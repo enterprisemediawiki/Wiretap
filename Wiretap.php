@@ -64,6 +64,7 @@ $wgResourceModules += array(
 	// ),
 
 	'ext.wiretap.charts' => $wiretapResourceTemplate + array(
+		'position' => 'bottom',
 		'styles' => 'charts/ext.wiretap.charts.css',
 		'scripts' => array(
 			'charts/Chart.js',
@@ -80,6 +81,7 @@ $wgResourceModules += array(
 	),
 
 	'ext.wiretap.d3.js' => $wiretapResourceTemplate + array(
+		'position' => 'bottom',
 		'scripts' => array(
 			'd3js/ext.wiretap.d3.js',
 		),
@@ -94,6 +96,7 @@ $wgResourceModules += array(
 	),
 
 	'ext.wiretap.charts.nvd3' => $wiretapResourceTemplate + array(
+		'position' => 'bottom',
 		'styles' => array(
 			'nvd3js/nv.d3.css',
 			'nvd3js/ext.wiretap.nvd3.css',

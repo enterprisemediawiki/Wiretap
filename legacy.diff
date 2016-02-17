@@ -1,0 +1,15 @@
+diff --git a/wiretapRecordLegacyHitCount.php b/wiretapRecordLegacyHitCount.php
+index ef8c32e..4adb1a7 100644
+--- a/wiretapRecordLegacyHitCount.php
++++ b/wiretapRecordLegacyHitCount.php
+@@ -92,8 +92,8 @@ class WiretapRecordLegacyHitCount extends Maintenance {
+ 
+ 		$arrayForDatabase = array();
+ 		foreach( $legacyCounter as $id => $count ) {
+-			if ( $count == 0 ) {
+-				continue; // don't bother recording pages that have zero hits
++			if ( $count < 1 ) {
++				continue; // don't record pages that have non-positive legacy hits
+ 			}
+ 			$arrayForDatabase[] = array(
+ 				'legacy_id' => $id,
