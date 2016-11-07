@@ -10,6 +10,11 @@
 	"SpecialPages": {
 		"Wiretap": "SpecialWiretap"
 	},
+	"MessagesDirs": {
+		"Wiretap": [
+			"i18n"
+		]
+	},
 	"ExtensionMessagesFiles": {
 		"Wiretap": "Wiretap.i18n.php",
 		"WiretapAlias": "Wiretap.alias.php"
