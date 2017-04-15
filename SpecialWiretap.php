@@ -53,7 +53,7 @@ class SpecialWiretap extends SpecialPage {
 		global $wgRequest;
 
 		// show the names of the different views
-		$navLine = '<strong>' . wfMsg( 'wiretap-viewmode' ) . ':</strong> ';
+		$navLine = '<strong>' . wfMessage( 'wiretap-viewmode' ) . ':</strong> ';
 
 		$filterUser = $wgRequest->getVal( 'filterUser' );
 		$filterPage = $wgRequest->getVal( 'filterPage' );
@@ -63,7 +63,7 @@ class SpecialWiretap extends SpecialPage {
 			$WiretapTitle = SpecialPage::getTitleFor( 'Wiretap' );
 			$unfilterLink = ': (' . Xml::element( 'a',
 				array( 'href' => $WiretapTitle->getLocalURL() ),
-				wfMsg( 'wiretap-unfilter' )
+				wfMessage( 'wiretap-unfilter' )
 			) . ')';
 
 		}
@@ -104,12 +104,12 @@ class SpecialWiretap extends SpecialPage {
 		if ( $this->mMode == $query_param ) {
 			return Xml::element( 'strong',
 				null,
-				wfMsg( $msg )
+				wfMessage( $msg )
 			);
 		} else {
 			return Xml::element( 'a',
 				array( 'href' => $WiretapTitle->getLocalURL( array( 'show' => $query_param ) ) ),
-				wfMsg( $msg )
+				wfMessage( $msg )
 			);
 		}
 
@@ -137,7 +137,7 @@ class SpecialWiretap extends SpecialPage {
 			$html .= $pager->getNavigationBar();
 		}
 		else {
-			$html .= '<p>' . wfMsgHTML('listusers-noresult') . '</p>';
+			$html .= '<p>' . wfMessageHTML('listusers-noresult') . '</p>';
 		}
 		$wgOut->addHTML( $html );
 	}
@@ -153,7 +153,7 @@ class SpecialWiretap extends SpecialPage {
 
 		// }
 		// else {
-			// $html .= '<p>' . wfMsgHTML('listusers-noresult') . '</p>';
+			// $html .= '<p>' . wfMessageHTML('listusers-noresult') . '</p>';
 		// }
 		// SELECT wiretap.hit_year, wiretap.hit_month, wiretap.hit_day, count(*) AS num_hits
 		// FROM wiretap
@@ -498,7 +498,7 @@ class WiretapPager extends ReverseChronologicalPager {
 
 	function formatRow( $row ) {
 		$userPage = Title::makeTitle( NS_USER, $row->user_name );
-		$name = $this->getSkin()->makeLinkObj( $userPage, htmlspecialchars( $userPage->getText() ) );
+		$name = Linker::link( $userPage, htmlspecialchars( $userPage->getText() ) );
 
 
 		if ( $this->filterUser ) {
@@ -508,7 +508,7 @@ class WiretapPager extends ReverseChronologicalPager {
 			$url = Title::newFromText('Special:Wiretap')->getLocalUrl(
 				array( 'filterUser' => $row->user_name )
 			);
-			$msg = wfMsg( 'wiretap-filteruser' );
+			$msg = wfMessage( 'wiretap-filteruser' );
 
 			$name .= ' (' . Xml::element(
 				'a',
@@ -535,7 +535,7 @@ class WiretapPager extends ReverseChronologicalPager {
 			$url = Title::newFromText('Special:Wiretap')->getLocalUrl(
 				array( 'filterPage' => $row->page_name )
 			);
-			$msg = wfMsg( 'wiretap-filterpage' );
+			$msg = wfMessage( 'wiretap-filterpage' );
 
 			$page .= ' (' . Xml::element(
 				'a',
