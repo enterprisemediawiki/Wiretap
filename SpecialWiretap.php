@@ -5,38 +5,38 @@ class SpecialWiretap extends SpecialPage {
 	public $mMode;
 
 	public function __construct() {
-		parent::__construct( 
-			"Wiretap", // 
+		parent::__construct(
+			"Wiretap", //
 			"",  // rights required to view
 			true // show in Special:SpecialPages
 		);
 	}
-	
+
 	function execute( $parser = null ) {
 		global $wgRequest, $wgOut;
 
-		list( $limit, $offset ) = wfCheckLimits();
+		list( $limit, $offset ) = $wgRequest->getLimitOffset();
 
 		// $userTarget = isset( $parser ) ? $parser : $wgRequest->getVal( 'username' );
 		$this->mMode = $wgRequest->getVal( 'show' );
 		//$fileactions = array('actions...?');
 
 		$wgOut->addHTML( $this->getPageHeader() );
-		
+
 		if ($this->mMode == 'total-hits-data') {
 			$this->totals();
 		}
 		else if ( $this->mMode == 'total-hits-chart' ) {
 			$this->totalsChart2();
 		}
-			
+
 		else if ( $this->mMode == 'unique-user-data' ) {
 			$this->uniqueTotals( false );
 		}
 		else if ( $this->mMode == 'unique-user-chart' ) {
 			$this->uniqueTotalsChart( false );
 		}
-		
+
 		else if ( $this->mMode == 'unique-user-page-data' ) {
 			$this->uniqueTotals( true );
 		}
@@ -48,73 +48,73 @@ class SpecialWiretap extends SpecialPage {
 			$this->hitsList();
 		}
 	}
-	
+
 	public function getPageHeader() {
 		global $wgRequest;
-		
+
 		// show the names of the different views
-		$navLine = '<strong>' . wfMsg( 'wiretap-viewmode' ) . ':</strong> ';
+		$navLine = '<strong>' . wfMessage( 'wiretap-viewmode' ) . ':</strong> ';
 
 		$filterUser = $wgRequest->getVal( 'filterUser' );
 		$filterPage = $wgRequest->getVal( 'filterPage' );
-		
+
 		if ( $filterUser || $filterPage ) {
-			
+
 			$WiretapTitle = SpecialPage::getTitleFor( 'Wiretap' );
 			$unfilterLink = ': (' . Xml::element( 'a',
 				array( 'href' => $WiretapTitle->getLocalURL() ),
-				wfMsg( 'wiretap-unfilter' )
+				wfMessage( 'wiretap-unfilter' )
 			) . ')';
 
 		}
 		else {
 			$unfilterLink = '';
 		}
-		
+
 		$navLine .= "<ul>";
 
 		$navLine .= "<li>" . $this->createHeaderLink( 'wiretap-hits' ) . $unfilterLink . "</li>";
 
-		$navLine .= "<li>" . wfMessage( 'wiretap-dailytotals' )->text() 
+		$navLine .= "<li>" . wfMessage( 'wiretap-dailytotals' )->text()
 			. ": (" . $this->createHeaderLink( 'wiretap-rawdata', 'total-hits-data' )
 			. ") (" . $this->createHeaderLink( 'wiretap-chart', 'total-hits-chart' )
 			. ")</li>";
-		
-		$navLine .= "<li>" . wfMessage( 'wiretap-dailyunique-user-hits' )->text() 
+
+		$navLine .= "<li>" . wfMessage( 'wiretap-dailyunique-user-hits' )->text()
 			. ": (" . $this->createHeaderLink( 'wiretap-rawdata', 'unique-user-data' )
 			. ") (" . $this->createHeaderLink( 'wiretap-chart', 'unique-user-chart' )
 			. ")</li>";
 
-		$navLine .= "<li>" . wfMessage( 'wiretap-dailyunique-user-page-hits' )->text() 
+		$navLine .= "<li>" . wfMessage( 'wiretap-dailyunique-user-page-hits' )->text()
 			. ": (" . $this->createHeaderLink( 'wiretap-rawdata', 'unique-user-page-data' )
 			. ") (" . $this->createHeaderLink( 'wiretap-chart', 'unique-user-page-chart' )
 			. ")</li>";
-			
+
 		$navLine .= "</ul>";
 
 		$out = Xml::tags( 'p', null, $navLine ) . "\n";
-		
+
 		return $out;
 	}
-	
+
 	function createHeaderLink($msg, $query_param = '' ) {
-	
+
 		$WiretapTitle = SpecialPage::getTitleFor( 'Wiretap' );
 
 		if ( $this->mMode == $query_param ) {
 			return Xml::element( 'strong',
 				null,
-				wfMsg( $msg )
+				wfMessage( $msg )
 			);
 		} else {
 			return Xml::element( 'a',
 				array( 'href' => $WiretapTitle->getLocalURL( array( 'show' => $query_param ) ) ),
-				wfMsg( $msg )
+				wfMessage( $msg )
 			);
 		}
 
 	}
-	
+
 	public function hitsList () {
 		global $wgOut, $wgRequest;
 
@@ -123,7 +123,7 @@ class SpecialWiretap extends SpecialPage {
 		$pager = new WiretapPager();
 		$pager->filterUser = $wgRequest->getVal( 'filterUser' );
 		$pager->filterPage = $wgRequest->getVal( 'filterPage' );
-		
+
 		// $form = $pager->getForm();
 		$body = $pager->getBody();
 		$html = '';
@@ -135,13 +135,13 @@ class SpecialWiretap extends SpecialPage {
 			$html .= $body;
 			$html .= '</table>';
 			$html .= $pager->getNavigationBar();
-		} 
+		}
 		else {
-			$html .= '<p>' . wfMsgHTML('listusers-noresult') . '</p>';
+			$html .= '<p>' . wfMessageHTML('listusers-noresult') . '</p>';
 		}
 		$wgOut->addHTML( $html );
 	}
-	
+
 	public function totals () {
 		global $wgOut;
 
@@ -150,14 +150,14 @@ class SpecialWiretap extends SpecialPage {
 		$html = '<table class="wikitable"><tr><th>Date</th><th>Hits</th></tr>';
 		// $html = $form;
 		// if ( $body ) {
-		
-		// } 
+
+		// }
 		// else {
-			// $html .= '<p>' . wfMsgHTML('listusers-noresult') . '</p>';
+			// $html .= '<p>' . wfMessageHTML('listusers-noresult') . '</p>';
 		// }
 		// SELECT wiretap.hit_year, wiretap.hit_month, wiretap.hit_day, count(*) AS num_hits
 		// FROM wiretap
-		// WHERE wiretap.hit_timestamp>20131001000000 
+		// WHERE wiretap.hit_timestamp>20131001000000
 		// GROUP BY wiretap.hit_year, wiretap.hit_month, wiretap.hit_day
 		// ORDER BY wiretap.hit_year DESC, wiretap.hit_month DESC, wiretap.hit_day DESC
 		// LIMIT 100000;
@@ -166,7 +166,7 @@ class SpecialWiretap extends SpecialPage {
 		$res = $dbr->select(
 			array('w' => 'wiretap'),
 			array(
-				"w.hit_year AS year", 
+				"w.hit_year AS year",
 				"w.hit_month AS month",
 				"w.hit_day AS day",
 				"count(*) AS num_hits",
@@ -182,13 +182,13 @@ class SpecialWiretap extends SpecialPage {
 			null // join conditions
 		);
 		while( $row = $dbr->fetchRow( $res ) ) {
-		
+
 			list($year, $month, $day, $hits) = array($row['year'], $row['month'], $row['day'], $row['num_hits']);
 			$html .= "<tr><td>$year-$month-$day</td><td>$hits</td></tr>";
-		
+
 		}
 		$html .= "</table>";
-		
+
 		$wgOut->addHTML( $html );
 
 	}
@@ -206,7 +206,7 @@ class SpecialWiretap extends SpecialPage {
 		$res = $dbr->select(
 			array('w' => 'wiretap'),
 			array(
-				"w.hit_year AS year", 
+				"w.hit_year AS year",
 				"w.hit_month AS month",
 				"w.hit_day AS day",
 				"count(*) AS num_hits",
@@ -224,12 +224,12 @@ class SpecialWiretap extends SpecialPage {
 		$previous = null;
 
 		while( $row = $dbr->fetchRow( $res ) ) {
-		
+
 			list($year, $month, $day, $hits) = array($row['year'], $row['month'], $row['day'], $row['num_hits']);
 
 			$currentDateString = "$year-$month-$day";
 			$current = new DateTime( $currentDateString );
-			
+
 			while ( $previous && $previous->modify( '+1 day' )->format( 'Y-m-d') !== $currentDateString ) {
 				$data[ $previous->format( 'Y-m-d' ) ] = 0;
 			}
@@ -238,14 +238,14 @@ class SpecialWiretap extends SpecialPage {
 
 			$previous = new DateTime( $currentDateString );
 		}
-		
+
 		//$html .= "<pre>" . print_r( $data, true ) . "</pre>";
 		$html .= "<script type='text/template-json' id='wiretap-data'>" . json_encode( $data ) . "</script>";
 
 		$wgOut->addHTML( $html );
 
 	}
-	
+
 	protected function getUniqueRows ( $uniquePageHits = true, $order = "DESC" ) {
 
 		$dbr = wfGetDB( DB_SLAVE );
@@ -253,14 +253,14 @@ class SpecialWiretap extends SpecialPage {
 		$fields = array(
 			"CONCAT(w.hit_year, '-', w.hit_month, '-', w.hit_day) AS date",
 		);
-		
+
 		if ( $uniquePageHits ) {
 			$fields[] = "COUNT(DISTINCT(CONCAT(w.user_name,'UNIQUESEPARATOR',w.page_id))) as hits";
 		}
 		else {
-			$fields[] = "COUNT(DISTINCT(w.user_name)) as hits";		
+			$fields[] = "COUNT(DISTINCT(w.user_name)) as hits";
 		}
-		
+
 		$res = $dbr->select(
 			array('w' => 'wiretap'),
 			$fields,
@@ -277,16 +277,16 @@ class SpecialWiretap extends SpecialPage {
 
 		$output = array();
 		while( $row = $dbr->fetchRow( $res ) ) {
-		
+
 			// list($year, $month, $day, $hits) = array($row['year'], $row['month'], $row['day'], $row['hits']);
-			
+
 			$output[] = array( 'date' => $row['date'], 'hits' => $row['hits'] );
-		
+
 		}
-		
+
 		return $output;
 	}
-	
+
 	public function uniqueTotals ( $showUniquePageHits = false ) {
 		global $wgOut;
 
@@ -296,25 +296,25 @@ class SpecialWiretap extends SpecialPage {
 		else {
 			$pageTitleText = "Daily Unique User-Hits";
 		}
-		
+
 		$wgOut->setPageTitle( 'Wiretap: ' . $pageTitleText );
 
 		$html = '<table class="wikitable"><tr><th>Date</th><th>Hits</th></tr>';
-		
+
 		$rows = $this->getUniqueRows( $showUniquePageHits, "DESC" );
-		
+
 		foreach($rows as $row) {
 			$html .= "<tr><td>{$row['date']}</td><td>{$row['hits']}</td></tr>";
 		}
-		
+
 		$html .= "</table>";
-		
+
 		$wgOut->addHTML( $html );
 
 	}
-	
+
 	public function uniqueTotalsChart ( $showUniquePageHits = false ) {
-	
+
 		global $wgOut;
 
 		if ( $showUniquePageHits ) {
@@ -323,7 +323,7 @@ class SpecialWiretap extends SpecialPage {
 		else {
 			$pageTitleText = "Daily Unique User-Hits";
 		}
-		
+
 		$wgOut->setPageTitle( "Wiretap: $pageTitleText Chart" );
 		$wgOut->addModules( 'ext.wiretap.charts.nvd3' );
 
@@ -334,11 +334,11 @@ class SpecialWiretap extends SpecialPage {
 		$previous = null;
 
 		foreach ( $rows as $row ) {
-		
+
 			list($currentDateString, $hits) = array($row['date'], $row['hits']);
 
 			$current = new DateTime( $currentDateString );
-			
+
 			while ( $previous && $previous->modify( '+1 day' )->format( 'Y-m-d') !== $currentDateString ) {
 				$data[] = array(
 					'x' => $previous->getTimestamp() * 1000, // x value timestamp in milliseconds
@@ -353,7 +353,7 @@ class SpecialWiretap extends SpecialPage {
 
 			$previous = new DateTime( $currentDateString );
 		}
-		
+
 		$data = array(
 			array(
 				'key' => $pageTitleText,
@@ -365,7 +365,7 @@ class SpecialWiretap extends SpecialPage {
 		$html .= "<script type='text/template-json' id='wiretap-data'>" . json_encode( $data ) . "</script>";
 
 		$wgOut->addHTML( $html );
-	
+
 	}
 
 	public function totalsChart2 () {
@@ -381,7 +381,7 @@ class SpecialWiretap extends SpecialPage {
 		$res = $dbr->select(
 			array('w' => 'wiretap'),
 			array(
-				"w.hit_year AS year", 
+				"w.hit_year AS year",
 				"w.hit_month AS month",
 				"w.hit_day AS day",
 				"count(*) AS num_hits",
@@ -400,12 +400,12 @@ class SpecialWiretap extends SpecialPage {
 		$previous = null;
 
 		while( $row = $dbr->fetchRow( $res ) ) {
-		
+
 			list($year, $month, $day, $hits) = array($row['year'], $row['month'], $row['day'], $row['num_hits']);
 
 			$currentDateString = "$year-$month-$day";
 			$current = new DateTime( $currentDateString );
-			
+
 			while ( $previous && $previous->modify( '+1 day' )->format( 'Y-m-d') !== $currentDateString ) {
 				$data[] = array(
 					'x' => $previous->getTimestamp() * 1000, // x value timestamp in milliseconds
@@ -420,7 +420,7 @@ class SpecialWiretap extends SpecialPage {
 
 			$previous = new DateTime( $currentDateString );
 		}
-		
+
 		$data = array(
 			array(
 				'key' => 'Daily Hits',
@@ -440,7 +440,7 @@ class WiretapPager extends ReverseChronologicalPager {
 	protected $rowCount = 0;
 	public $filterUser;
 	public $filterPage;
-	
+
 	function __construct() {
 		parent::__construct();
 		// global $wgRequest;
@@ -453,7 +453,7 @@ class WiretapPager extends ReverseChronologicalPager {
 	function getIndexField() {
 		return "hit_timestamp";
 	}
-	
+
 	function getExtraSortFields() {
 		return array();
 	}
@@ -461,7 +461,7 @@ class WiretapPager extends ReverseChronologicalPager {
 	function isNavigationBarShown() {
 		return true;
 	}
-	
+
 	function getQueryInfo() {
 		$conds = array();
 		// if ( $this->filterUsers ) {
@@ -474,17 +474,17 @@ class WiretapPager extends ReverseChronologicalPager {
 			// $excludeUsers .= implode( "', '", $this->ignoreUserList ) . "')";
 			// $conds[] = $excludeUsers;
 		// }
-		
+
 		if ( $this->filterUser ) {
 			$conds[] = "user_name = '{$this->filterUser}'";
 		}
 		if ( $this->filterPage ) {
 			$conds[] = "page_name = '{$this->filterPage}'";
 		}
-		
+
 		return array(
 			'tables' => 'wiretap',
-			'fields' => array( 
+			'fields' => array(
 				'page_id',
 				'page_name',
 				'user_name',
@@ -498,8 +498,8 @@ class WiretapPager extends ReverseChronologicalPager {
 
 	function formatRow( $row ) {
 		$userPage = Title::makeTitle( NS_USER, $row->user_name );
-		$name = $this->getSkin()->makeLinkObj( $userPage, htmlspecialchars( $userPage->getText() ) );
-		
+		$name = Linker::link( $userPage, htmlspecialchars( $userPage->getText() ) );
+
 
 		if ( $this->filterUser ) {
 			// do nothing for now...
@@ -508,8 +508,8 @@ class WiretapPager extends ReverseChronologicalPager {
 			$url = Title::newFromText('Special:Wiretap')->getLocalUrl(
 				array( 'filterUser' => $row->user_name )
 			);
-			$msg = wfMsg( 'wiretap-filteruser' );
-			
+			$msg = wfMessage( 'wiretap-filteruser' );
+
 			$name .= ' (' . Xml::element(
 				'a',
 				array( 'href' => $url ),
@@ -517,17 +517,17 @@ class WiretapPager extends ReverseChronologicalPager {
 			) . ')';
 		}
 
-		
+
 		$pageTitle = Title::newFromID( $row->page_id );
 		if ( ! $pageTitle )
 			$pageTitle = Title::newFromText( $row->page_name );
-		
+
 		if ( ! $pageTitle )
 			$page = $row->page_name; // if somehow still no page, just show text
 		else
 			$page = $this->getSkin()->link( $pageTitle );
 
-			
+
 		if ( $this->filterPage ) {
 			// do nothing for now...
 		}
@@ -535,22 +535,22 @@ class WiretapPager extends ReverseChronologicalPager {
 			$url = Title::newFromText('Special:Wiretap')->getLocalUrl(
 				array( 'filterPage' => $row->page_name )
 			);
-			$msg = wfMsg( 'wiretap-filterpage' );
-			
+			$msg = wfMessage( 'wiretap-filterpage' );
+
 			$page .= ' (' . Xml::element(
 				'a',
 				array( 'href' => $url ),
 				$msg
 			) . ')';
 		}
-		
+
 		if ( $row->referer_title ) {
 			$referer = Title::newFromText( $row->referer_title );
 			$referer = $this->getSkin()->link( $referer );
 		}
 		else
 			$referer = '';
-		
+
 		global $wgLang;
 		$timestamp = $wgLang->timeanddate( wfTimestamp( TS_MW, $row->hit_timestamp ), true );
 
