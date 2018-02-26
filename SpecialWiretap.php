@@ -1,7 +1,4 @@
 <?php
-// for LinkRenderer
-use MediaWiki\MediaWikiServices;
-
 class SpecialWiretap extends SpecialPage {
 
 	public $mMode;
@@ -527,8 +524,7 @@ class WiretapPager extends ReverseChronologicalPager {
 		if ( ! $pageTitle )
 			$page = $row->page_name; // if somehow still no page, just show text
 		else {
-			$linkRenderer = MediaWikiServices::getInstance()->getLinkRenderer();
-			$page = $linkRenderer->makeLink( $pageTitle );
+			$page = Linker::link( $pageTitle );
 		}
 
 		if ( $this->filterPage ) {
@@ -549,7 +545,7 @@ class WiretapPager extends ReverseChronologicalPager {
 
 		if ( $row->referer_title ) {
 			$referer = Title::newFromText( $row->referer_title );
-			$referer = $linkRenderer->makeLink( $referer );
+			$referer = Linker::link( $referer );
 		}
 		else
 			$referer = '';
