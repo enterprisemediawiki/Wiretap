@@ -1,5 +1,4 @@
 <?php
-
 class SpecialWiretap extends SpecialPage {
 
 	public $mMode;
@@ -524,9 +523,9 @@ class WiretapPager extends ReverseChronologicalPager {
 
 		if ( ! $pageTitle )
 			$page = $row->page_name; // if somehow still no page, just show text
-		else
-			$page = $this->getSkin()->link( $pageTitle );
-
+		else {
+			$page = Linker::link( $pageTitle );
+		}
 
 		if ( $this->filterPage ) {
 			// do nothing for now...
@@ -546,7 +545,7 @@ class WiretapPager extends ReverseChronologicalPager {
 
 		if ( $row->referer_title ) {
 			$referer = Title::newFromText( $row->referer_title );
-			$referer = $this->getSkin()->link( $referer );
+			$referer = Linker::link( $referer );
 		}
 		else
 			$referer = '';
