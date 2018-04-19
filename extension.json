@@ -73,5 +73,6 @@
 		"WiretapCounterPeriod": 30,
 		"WiretapAddToAlltimeCounter": true,
 		"WiretapAddToPeriodCounter": false
-	}
+	},
+	"manifest_version": 1
 }
