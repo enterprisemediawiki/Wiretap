@@ -42,6 +42,9 @@ class SpecialWiretap extends SpecialPage {
 		else if ( $this->mMode == 'unique-user-page-chart' ) {
 			$this->uniqueTotalsChart( true );
 		}
+		else if ( $this->mMode == 'trending-pages' ) {
+			$this->trendingPages( true );
+		}
 
 		else {
 			$this->hitsList();
@@ -88,6 +91,8 @@ class SpecialWiretap extends SpecialPage {
 			. ": (" . $this->createHeaderLink( 'wiretap-rawdata', 'unique-user-page-data' )
 			. ") (" . $this->createHeaderLink( 'wiretap-chart', 'unique-user-page-chart' )
 			. ")</li>";
+
+		$navLine .= "<li>" . $this->createHeaderLink( 'wiretap-trending-pages', 'trending-pages' ) . "</li>";
 
 		$navLine .= "</ul>";
 
@@ -202,6 +207,18 @@ class SpecialWiretap extends SpecialPage {
 
 		$dbr = wfGetDB( DB_SLAVE );
 
+		$conds = array();
+
+		$filterUser = $wgRequest->getVal( 'filterUser' );
+		$filterPage = $wgRequest->getVal( 'filterPage' );
+
+		if ( $filterUser ) {
+			$conds['w.user_name'] = $filterUser;
+		}
+		if ( $filterPage ) {
+			$conds['w.page_name'] = $filterPage;
+		}
+
 		$res = $dbr->select(
 			array('w' => 'wiretap'),
 			array(
@@ -210,7 +227,7 @@ class SpecialWiretap extends SpecialPage {
 				"w.hit_day AS day",
 				"count(*) AS num_hits",
 			),
-			null, //'w.hit_timestamp > 20140801000000', //null, // CONDITIONS? 'wiretap.hit_timestamp>20131001000000',
+			$conds, //'w.hit_timestamp > 20140801000000', //null, // CONDITIONS? 'wiretap.hit_timestamp>20131001000000',
 			__METHOD__,
 			array(
 				"DISTINCT",
@@ -433,6 +450,96 @@ class SpecialWiretap extends SpecialPage {
 		$wgOut->addHTML( $html );
 	}
 
+	public function trendingPages () {
+		$wgOut->setPageTitle( 'Wiretap: Trending Pages' );
+
+		$html = '<table class="wikitable"><tr><th>Page</th><th>Total Hits</th><th>Trendline slope</th></tr>';
+
+		$dbw = wfGetDB( DB_MASTER );
+
+		$start = 20180700000000;
+		$minimumTotalHits = 100;
+
+		$query = "
+			CREATE TEMPORARY TABLE IF NOT EXISTS hits_history AS (
+			    SELECT
+			        page_id,
+			        page_name,
+			        TIMESTAMPDIFF( DAY, '2018-01-01 00:00:00', CAST( CONCAT(hit_year, "-", hit_month, "-", hit_day) AS date) ) AS hits_date,
+			        COUNT(*) AS hits
+			    FROM wiretap
+			    WHERE
+			        hit_timestamp > @start
+			        AND page_id > 1
+			        AND hit_weekday NOT IN (0,6)
+			    GROUP BY page_id, hits_date
+			)";
+		$res = $dbw->query( $query );
+
+		// this is a garbagy hack.
+		$query = "
+			CREATE TEMPORARY TABLE IF NOT EXISTS hits_history2 AS (
+			    SELECT
+			        page_id,
+			        page_name,
+			        TIMESTAMPDIFF( DAY, '2018-01-01 00:00:00', CAST( CONCAT(hit_year, "-", hit_month, "-", hit_day) AS date) ) AS hits_date,
+			        COUNT(*) AS hits
+			    FROM wiretap
+			    WHERE
+			        hit_timestamp > @start
+			        AND page_id > 1
+			        AND hit_weekday NOT IN (0,6)
+			    GROUP BY page_id, hits_date
+			)";
+		$res = $dbw->query( $query );
+
+		$query = "
+			SELECT DISTINCT
+			    hits_history.page_id,
+			    hits_history.page_name,
+			    -- (SELECT COUNT(*) FROM wiretap WHERE wiretap.page_id = hits_history.page_id AND hit_timestamp > @start) AS total_hits,
+			    Sum_Y AS total_hits,
+			    (N * Sum_XY - Sum_X * Sum_Y)/(N * Sum_X2 - Sum_X * Sum_X) AS Slope
+			FROM hits_history
+			INNER JOIN (
+			    SELECT
+			        page_id,
+			        COUNT(*) AS N,
+			        SUM(hits_date) AS Sum_X,
+			        SUM(hits_date * hits_date) AS Sum_X2,
+			        SUM(hits) AS Sum_Y,
+			        SUM(hits*hits) AS Sum_Y2,
+			        SUM(hits_date * hits) AS Sum_XY
+			    FROM hits_history2
+			    GROUP BY page_id
+			) G ON G.page_id = hits_history.page_id
+			WHERE Sum_Y > $minimumTotalHits
+			ORDER BY Slope DESC;
+		";
+		$res = $dbw->query( $query );
+
+		while( $row = $dbw->fetchRow( $res ) ) {
+
+			list($pageName, $hits, $slope) = array($row['page_name'], $row['total_hits'], $row['Slope']);
+
+			$pageLink = Linker::link( Title::newFromText( $pageName ) );
+
+			$chartJustThisPage = Linker::link(
+				Title::newFromText('Special:Wiretap'),
+				'view chart',
+				[],
+				[
+					'filterUser' => $pageName,
+					'show' => 'total-hits-chart',
+				]
+			);
+
+			$html .= "<tr><td>$pageLink ($chartJustThisPage)</td><td>$hits</td><td>$slope</td></tr>";
+
+		}
+		$html .= "</table>";
+
+		$wgOut->addHTML( $html );
 }
 
 class WiretapPager extends ReverseChronologicalPager {
