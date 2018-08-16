@@ -394,6 +394,18 @@ class SpecialWiretap extends SpecialPage {
 
 		$dbr = wfGetDB( DB_SLAVE );
 
+		$conds = array();
+
+		$filterUser = $this->getRequest()->getVal( 'filterUser' );
+		$filterPage = $this->getRequest()->getVal( 'filterPage' );
+
+		if ( $filterUser ) {
+			$conds['w.user_name'] = $filterUser;
+		}
+		if ( $filterPage ) {
+			$conds['w.page_name'] = $filterPage;
+		}
+
 		$res = $dbr->select(
 			array('w' => 'wiretap'),
 			array(
@@ -402,7 +414,7 @@ class SpecialWiretap extends SpecialPage {
 				"w.hit_day AS day",
 				"count(*) AS num_hits",
 			),
-			null, //'w.hit_timestamp > 20140801000000', //null, // CONDITIONS? 'wiretap.hit_timestamp>20131001000000',
+			$conds, //'w.hit_timestamp > 20140801000000', //null, // CONDITIONS? 'wiretap.hit_timestamp>20131001000000',
 			__METHOD__,
 			array(
 				"DISTINCT",
@@ -451,25 +463,27 @@ class SpecialWiretap extends SpecialPage {
 	}
 
 	public function trendingPages () {
+		global $wgOut;
+
 		$wgOut->setPageTitle( 'Wiretap: Trending Pages' );
 
 		$html = '<table class="wikitable"><tr><th>Page</th><th>Total Hits</th><th>Trendline slope</th></tr>';
 
 		$dbw = wfGetDB( DB_MASTER );
 
-		$start = 20180700000000;
-		$minimumTotalHits = 100;
+		$start = $this->getRequest()->getVal( "since", 20180700000000 );
+		$minimumTotalHits = $this->getRequest()->getVal( "minHits", 100 );
 
 		$query = "
 			CREATE TEMPORARY TABLE IF NOT EXISTS hits_history AS (
 			    SELECT
 			        page_id,
 			        page_name,
-			        TIMESTAMPDIFF( DAY, '2018-01-01 00:00:00', CAST( CONCAT(hit_year, "-", hit_month, "-", hit_day) AS date) ) AS hits_date,
+			        TIMESTAMPDIFF( DAY, '2018-01-01 00:00:00', CAST( CONCAT(hit_year, '-', hit_month, '-', hit_day) AS date) ) AS hits_date,
 			        COUNT(*) AS hits
 			    FROM wiretap
 			    WHERE
-			        hit_timestamp > @start
+			        hit_timestamp > $start
 			        AND page_id > 1
 			        AND hit_weekday NOT IN (0,6)
 			    GROUP BY page_id, hits_date
@@ -482,11 +496,11 @@ class SpecialWiretap extends SpecialPage {
 			    SELECT
 			        page_id,
 			        page_name,
-			        TIMESTAMPDIFF( DAY, '2018-01-01 00:00:00', CAST( CONCAT(hit_year, "-", hit_month, "-", hit_day) AS date) ) AS hits_date,
+			        TIMESTAMPDIFF( DAY, '2018-01-01 00:00:00', CAST( CONCAT(hit_year, '-', hit_month, '-', hit_day) AS date) ) AS hits_date,
 			        COUNT(*) AS hits
 			    FROM wiretap
 			    WHERE
-			        hit_timestamp > @start
+			        hit_timestamp > $start
 			        AND page_id > 1
 			        AND hit_weekday NOT IN (0,6)
 			    GROUP BY page_id, hits_date
@@ -529,7 +543,7 @@ class SpecialWiretap extends SpecialPage {
 				'view chart',
 				[],
 				[
-					'filterUser' => $pageName,
+					'filterPage' => $pageName,
 					'show' => 'total-hits-chart',
 				]
 			);
@@ -540,6 +554,7 @@ class SpecialWiretap extends SpecialPage {
 		$html .= "</table>";
 
 		$wgOut->addHTML( $html );
+	}
 }
 
 class WiretapPager extends ReverseChronologicalPager {
