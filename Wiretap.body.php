@@ -47,9 +47,9 @@ class Wiretap {
 	}
 
 	public static function recordInDatabase (  ) { // could have param &$output
-		global $wgRequestTime, $egWiretapCurrentHit;
+		global $wgRequestTime, $egWiretapCurrentHit, $wgReadOnly;
 
-		if ( ! isset( $egWiretapCurrentHit ) || ! isset( $egWiretapCurrentHit['page_id'] ) ) {
+		if ( $wgReadOnly || ! isset( $egWiretapCurrentHit ) || ! isset( $egWiretapCurrentHit['page_id'] ) ) {
 			return true; // for whatever reason the poorly-named "updateTable" method was not called; abort.
 		}
 
