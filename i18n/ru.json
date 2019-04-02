@@ -1,0 +1,16 @@
+{
+	"wiretap": "Wiretap",
+	"wiretap-desc": "Позволяет отслеживать просмотры страниц и отображать различные данные.",
+	"wiretap-viewmode": "режим просмотра",
+	"wiretap-hits": "Индивидуальные хиты",
+	"wiretap-dailytotals": "количество просмотров страницы за деньy", 
+	"wiretap-dailytotalschart": "График итогов ежедневных хитов", 
+	"wiretap-dailyunique-user-hits": "Уникальный пользовательский хит",  
+	"wiretap-dailyunique-user-page-hits": "количество ежедневных просмотров страниц уникальным пользователем",
+	"wiretap-filteruser": "пользователь фильтра",
+	"wiretap-filterpage": "страница фильтра", 
+	"wiretap-unfilter": "отменить фильтр",  
+	"wiretap-rawdata": "данные",
+	"wiretap-chart": "Диаграмма",
+	"wiretap-viewcount": "Общее количество просмотров страницы: $1 ($2 через редирект)"
+}

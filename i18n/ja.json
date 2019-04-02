@@ -1,0 +1,16 @@
+{
+	"wiretap": "Wiretap",
+	"wiretap-desc": "ページビューを追跡し、さまざまなデータ表示を提供します。",  
+	"wiretap-viewmode": "ビューモード",
+	"wiretap-hits": "個々のページヒット",
+	"wiretap-dailytotals": "1日のページビュー数",
+	"wiretap-dailytotalschart": "毎日のヒット合計のグラフ", 
+	"wiretap-dailyunique-user-hits": "毎日のユニークユーザービュー",
+	"wiretap-dailyunique-user-page-hits": "ユニークユーザー別の毎日のページビュー",
+	"wiretap-filteruser": "ユーザをフィルタする",
+	"wiretap-filterpage": "フィルタページ", 
+	"wiretap-unfilter": "フィルタ解除",
+	"wiretap-rawdata": "データ",
+	"wiretap-chart": "チャート",
+	"wiretap-viewcount": "このページは閲覧されました $1 {{PLURAL:$1|度|回}} ($2 リダイレクト経由)" 
+}

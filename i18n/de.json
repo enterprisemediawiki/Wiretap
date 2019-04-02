@@ -4,7 +4,13 @@
 	"wiretap-viewmode": "Ansicht",
 	"wiretap-hits": "Zugriffe",
 	"wiretap-dailytotals": "Tagesgesamtzugriffe",
+	"wiretap-dailytotalschart": "Tägliche Treffer Gesamttabelle",
+	"wiretap-dailyunique-user-hits": "Einzigartige User-Hits",
+	"wiretap-dailyunique-user-page-hits": "Einzigartige Seitenaufrufe für Benutzer",
 	"wiretap-filteruser": "Benutzerfilter setzen",
 	"wiretap-filterpage": "Seitenfilter setzen",
-	"wiretap-unfilter": "Filter aufheben"
+	"wiretap-unfilter": "Filter aufheben",
+	"wiretap-rawdata": "Daten",
+	"wiretap-chart": "Diagramm",
+	"wiretap-viewcount": "Diese Seite wurde angesehen $1 {{PLURAL:$1|zeit|mal}} ($2 über Weiterleitung)"
 }
