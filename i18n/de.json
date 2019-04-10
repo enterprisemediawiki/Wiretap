@@ -12,6 +12,5 @@
 	"wiretap-unfilter": "Filter aufheben",
 	"wiretap-rawdata": "Daten",
 	"wiretap-chart": "Diagramm",
-	"wiretap-viewcount": "Diese Seite wurde angesehen $1 {{PLURAL:$1|zeit|mal}} ($2 über Weiterleitung)"
+	"wiretap-viewcount": "diese Seite wurde $1 {{PLURAL:$1|zeit|mal}} aufgerufen ($2 Mal über Weiterleitung)"
 }
-

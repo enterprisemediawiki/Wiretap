@@ -1,17 +1,16 @@
 {
 	"wiretap": "Wiretap",
-	"wiretap-desc": "Permite que você acompanhe exibições de página e forneça várias exibições de dados",  
-	"wiretap-viewmode": "modo de visualização", 
-	"wiretap-hits": "visualizações de páginas individuais", 
-	"wiretap-dailytotals": "número de visualizações de páginas por dia", 
-	"wiretap-dailytotalschart": "Gráfico de totais de ocorrências diárias", 
+	"wiretap-desc": "Permite que você acompanhe exibições de página e forneça várias exibições de dados",
+	"wiretap-viewmode": "modo de visualização",
+	"wiretap-hits": "visualizações de páginas individuais",
+	"wiretap-dailytotals": "número de visualizações de páginas por dia",
+	"wiretap-dailytotalschart": "Gráfico de totais de ocorrências diárias",
 	"wiretap-dailyunique-user-hits": "Visualizações de usuário únicas diárias",
-	"wiretap-dailyunique-user-page-hits": "Visualizações de página diárias por usuário único", 
+	"wiretap-dailyunique-user-page-hits": "Visualizações de página diárias por usuário único",
 	"wiretap-filteruser": "filtrar usuários",
 	"wiretap-filterpage": "página de filtro",
 	"wiretap-unfilter": "desfazer filtro",
 	"wiretap-rawdata": "Dados",
 	"wiretap-chart": "Gráfico",
-	"wiretap-viewcount": "Esta página foi visualizada $1 {{PLURAL:$1|vez|vezes}} ($2 via redirecionamento)" 
+	"wiretap-viewcount": "Esta página foi visualizada $1 {{PLURAL:$1|vez|vezes}} ($2 por redirecionamento)"
 }
-

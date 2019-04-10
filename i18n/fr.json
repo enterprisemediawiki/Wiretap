@@ -12,6 +12,5 @@
 	"wiretap-unfilter": "annuler le filtre",
 	"wiretap-rawdata": "données brutes",
 	"wiretap-chart": "le graphique",
-	"wiretap-viewcount": "Cette page a été vue $1 {{PLURAL:$1|fois|fois}} ($2 via redirection)"
+	"wiretap-viewcount": "Cette page a été consultée $1 {{PLURAL:$1|fois|fois}} (dont $2 redirections vers cette page)"
 }
-

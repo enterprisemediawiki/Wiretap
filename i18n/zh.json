@@ -5,13 +5,12 @@
 	"wiretap-hits": "个人命中",
 	"wiretap-dailytotals": "每日总命中数",
 	"wiretap-dailytotalschart": "每天的总页面点击次数",
-	"wiretap-dailyunique-user-hits": "独特的每日用户数",  
-	"wiretap-dailyunique-user-page-hits": "每日唯一用户页数", 
-	"wiretap-filteruser": "过滤用户", 
+	"wiretap-dailyunique-user-hits": "独特的每日用户数",
+	"wiretap-dailyunique-user-page-hits": "每日唯一用户页数",
+	"wiretap-filteruser": "过滤用户",
 	"wiretap-filterpage": "filter",
-	"wiretap-unfilter": "撤消过滤器", 
+	"wiretap-unfilter": "撤消过滤器",
 	"wiretap-rawdata": "原始数据",
 	"wiretap-chart": "图表",
-	"wiretap-viewcount": "此页面已被浏览过 $1 {{PLURAL:$1|度|时}} ($2 通过重定向)"
+	"wiretap-viewcount": "本頁面已檢視過 $1 {{PLURAL:$1|次|次}} ($2 次經重新導向而來)"
 }
-

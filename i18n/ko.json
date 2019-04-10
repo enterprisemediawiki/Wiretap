@@ -4,14 +4,13 @@
 	"wiretap-viewmode": "보기 모드",
 	"wiretap-hits": "순 페이지 뷰 수",
 	"wiretap-dailytotals": "일일 페이지 뷰",
-	"wiretap-dailytotalschart": "일일 총 히트 차트", 
-	"wiretap-dailyunique-user-hits": "일별 순 사용자",  
+	"wiretap-dailytotalschart": "일일 총 히트 차트",
+	"wiretap-dailyunique-user-hits": "일별 순 사용자",
 	"wiretap-dailyunique-user-page-hits": "고유 한 사용자 페이지 방문 횟수",
 	"wiretap-filteruser": "사용자 필터",
-	"wiretap-filterpage": "페이지 필터",  
-	"wiretap-unfilter": "필터 실행 취소", 
+	"wiretap-filterpage": "페이지 필터",
+	"wiretap-unfilter": "필터 실행 취소",
 	"wiretap-rawdata": "데이터",
 	"wiretap-chart": "차트",
-	"wiretap-viewcount": "총 페이지 조회수 : $1 ($2 리디렉션을 통해)" 
+	"wiretap-viewcount": "이 페이지의 조회수는  : $1 입니다 (이 중 $2 개는 리디렉트를 통한 조회)" 
 }
-
