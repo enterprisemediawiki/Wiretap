@@ -1,0 +1,16 @@
+{
+	"wiretap": "Wiretap",
+	"wiretap-desc": "Vous permet de suivre les consultations de page et fournit divers affichages de données",
+	"wiretap-viewmode": "mode d'affichage",
+	"wiretap-hits": "nombre de pages vues uniques",
+	"wiretap-dailytotals": "Nombre total de pages vues par jour",
+	"wiretap-dailytotalschart": "tableau des totaux quotidiens",
+	"wiretap-dailyunique-user-hits": "nombre d'utilisateurs unique quotidien",
+	"wiretap-dailyunique-user-page-hits": "nombre d'utilisateurs quotidiens uniques par page",
+	"wiretap-filteruser": "filtrer les utilisateurs",
+	"wiretap-filterpage": "filtrer les pages",
+	"wiretap-unfilter": "annuler le filtre",
+	"wiretap-rawdata": "données brutes",
+	"wiretap-chart": "le graphique",
+	"wiretap-viewcount": "Cette page a été consultée $1 {{PLURAL:$1|fois|fois}} (dont $2 redirections vers cette page)"
+}

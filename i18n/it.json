@@ -1,0 +1,16 @@
+{
+	"wiretap": "Wiretap",
+	"wiretap-desc": "Ti consente di tracciare visualizzazioni di pagina e fornisce varie visualizzazioni di dati",
+	"wiretap-viewmode": "modalità di visualizzazione",
+	"wiretap-hits": "numero di visualizzazioni di pagina uniche",
+	"wiretap-dailytotals": "numero di pagine viste al giorno",
+	"wiretap-dailytotalschart": "grafico delle visualizzazioni di pagina totali giornaliere",
+	"wiretap-dailyunique-user-hits": "viste utente uniche giornaliere",
+	"wiretap-dailyunique-user-page-hits": "visualizzazioni di pagina giornaliere per utente unico",
+	"wiretap-filteruser": "filtrare gli utenti",
+	"wiretap-filterpage": "filtrare le pagine",
+	"wiretap-unfilter": "annulla filtro",
+	"wiretap-rawdata": "Dati",
+	"wiretap-chart": "Grafico",
+  "wiretap-viewcount": "Questa pagina è stata visualizzata $1 {{PLURAL:$1|evento|occorrenze}} ($2 su reindirizzamento)"
+}
