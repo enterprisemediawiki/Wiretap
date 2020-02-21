@@ -14,7 +14,12 @@ class SpecialWiretap extends SpecialPage {
 	function execute( $parser = null ) {
 		global $wgRequest, $wgOut;
 
-		list( $limit, $offset ) = $wgRequest->getLimitOffset();
+		if ( method_exists( $wgRequest, 'getLimitOffsetForUser' ) ) {
+			// MW 1.35+
+			list( $limit, $offset ) = $wgRequest->getLimitOffsetForUser( $this->getUser() );
+		} else {
+			list( $limit, $offset ) = $wgRequest->getLimitOffset();
+		}
 
 		// $userTarget = isset( $parser ) ? $parser : $wgRequest->getVal( 'username' );
 		$this->mMode = $wgRequest->getVal( 'show' );
