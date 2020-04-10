@@ -236,7 +236,7 @@ class Wiretap {
 			$findIDs[] = $r->getArticleID();
 		}
 
-		$dbr = wfGetDB( DB_SLAVE );
+		$dbr = wfGetDB( DB_REPLICA );
 		$result = $dbr->select(
 			array(
 				'w' => 'wiretap_counter_alltime',
