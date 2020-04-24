@@ -17,7 +17,7 @@ If upgrading, make sure to run `php maintenance/update.php` as well as `php exte
 
 ### Before upgrading to MediaWiki 1.25
 
-Before upgrading your instalation to MediaWiki 1.25, make sure to grab the latest Wiretap and in addition to running update.php and wiretapRecordPageHitCount.php, also run:
+Before upgrading your installation to MediaWiki 1.25, make sure to grab the latest Wiretap and in addition to running update.php and wiretapRecordPageHitCount.php, also run:
 
 ```
 php extensions/Wiretap/wiretapRecordLegacyHitCount.php
