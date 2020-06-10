@@ -160,7 +160,7 @@ class SpecialWiretap extends SpecialPage {
 		// GROUP BY wiretap.hit_year, wiretap.hit_month, wiretap.hit_day
 		// ORDER BY wiretap.hit_year DESC, wiretap.hit_month DESC, wiretap.hit_day DESC
 		// LIMIT 100000;
-		$dbr = wfGetDB( DB_SLAVE );
+		$dbr = wfGetDB( DB_REPLICA );
 
 		$res = $dbr->select(
 			array('w' => 'wiretap'),
@@ -200,7 +200,7 @@ class SpecialWiretap extends SpecialPage {
 
 		$html = '<canvas id="wiretapChart" width="400" height="400"></canvas>';
 
-		$dbr = wfGetDB( DB_SLAVE );
+		$dbr = wfGetDB( DB_REPLICA );
 
 		$res = $dbr->select(
 			array('w' => 'wiretap'),
@@ -247,7 +247,7 @@ class SpecialWiretap extends SpecialPage {
 
 	protected function getUniqueRows ( $uniquePageHits = true, $order = "DESC" ) {
 
-		$dbr = wfGetDB( DB_SLAVE );
+		$dbr = wfGetDB( DB_REPLICA );
 
 		$fields = array(
 			"CONCAT(w.hit_year, '-', w.hit_month, '-', w.hit_day) AS date",
@@ -375,7 +375,7 @@ class SpecialWiretap extends SpecialPage {
 
 		$html = '<div id="wiretap-chart"><svg height="400px"></svg></div>';
 
-		$dbr = wfGetDB( DB_SLAVE );
+		$dbr = wfGetDB( DB_REPLICA );
 
 		$res = $dbr->select(
 			array('w' => 'wiretap'),
