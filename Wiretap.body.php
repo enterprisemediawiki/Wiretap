@@ -47,9 +47,9 @@ class Wiretap {
 	}
 
 	public static function recordInDatabase (  ) { // could have param &$output
-		global $wgRequestTime, $egWiretapCurrentHit, $wgReadOnly;
+		global $wgRequestTime, $egWiretapCurrentHit;
 
-		if ( $wgReadOnly || ! isset( $egWiretapCurrentHit ) || ! isset( $egWiretapCurrentHit['page_id'] ) ) {
+		if ( ! isset( $egWiretapCurrentHit ) || ! isset( $egWiretapCurrentHit['page_id'] ) ) {
 			return true; // for whatever reason the poorly-named "updateTable" method was not called; abort.
 		}
 
@@ -236,7 +236,7 @@ class Wiretap {
 			$findIDs[] = $r->getArticleID();
 		}
 
-		$dbr = wfGetDB( DB_REPLICA );
+		$dbr = wfGetDB( DB_MASTER );
 		$result = $dbr->select(
 			array(
 				'w' => 'wiretap_counter_alltime',

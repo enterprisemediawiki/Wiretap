@@ -29,22 +29,3 @@ This extension is intended for internal corporate wikis where transparency is mo
 important than privacy. It is definitely very invasive for an open, internet-facing
 wiki. If you insist on installing it on a public wiki please make your users aware
 that they are not browsing with the anonymity they are familiar with from MediaWiki.
-
-## Config
-
-The following config was taken from Wiretap.php prior to it being gutted for the new extension registration method. This should be written into proper documentation.
-
-```php
-// for selecting a short period over which to count hits to pages
-// set to 1 to count over the last day, 4 over the last 4 days, etc
-$wgWiretapCounterPeriod = 30;
-
-// use the all-time counter by default
-$wgWiretapAddToAlltimeCounter = true;
-
-// don't use the period counter by default
-$wgWiretapAddToPeriodCounter = false;
-
-// of course we want counters! why else have the extension!
-$wgDisableCounters = false;
-```
