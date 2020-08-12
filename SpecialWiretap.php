@@ -309,7 +309,7 @@ class SpecialWiretap extends SpecialPage {
 
 		// This writes the Unique User-Hit data to a file named "UUHitsforWiki_<wikiID>.csv" that is accessible by browser off of the server base url.
 		$fp = fopen("/opt/htdocs/UUHitsforWiki_".str_replace("/","",str_replace("Special:Wiretap","",SpecialPage::getTitleFor('Wiretap')->getLocalURL())).".csv", 'w');
-                fwrite($fp, "Date UUHits\n" );
+                fwrite($fp, "Date, UUHits\n" );
 		
 		foreach($rows as $row) {
 			$html .= "<tr><td>{$row['date']}</td><td>{$row['hits']}</td></tr>";
