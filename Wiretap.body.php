@@ -12,7 +12,7 @@ class Wiretap {
 	 **/
 	public static function updateTable( &$title, &$article, &$output, &$user, $request, $mediaWiki ) {
 
-		$output->enableClientCache( false );
+		$output->disableClientCache();
 		$output->addMeta( 'http:Pragma', 'no-cache' );
 
 		global $wgRequestTime, $egWiretapCurrentHit;
