@@ -1,4 +1,7 @@
 <?php
+
+use MediaWiki\MediaWikiServices;
+
 class SpecialWiretap extends SpecialPage {
 
 	public $mMode;
@@ -9,6 +12,9 @@ class SpecialWiretap extends SpecialPage {
 			"",  // rights required to view
 			true // show in Special:SpecialPages
 		);
+		$this->mediaWikiServices = MediaWikiServices::getInstance();
+		$this->loadBalancer = $this->mediaWikiServices->getDBLoadBalancer();
+		$this->databaseRead = $this->loadBalancer->getConnectionRef( DB_REPLICA );
 	}
 
 	function execute( $parser = null ) {
@@ -165,27 +171,24 @@ class SpecialWiretap extends SpecialPage {
 		// GROUP BY wiretap.hit_year, wiretap.hit_month, wiretap.hit_day
 		// ORDER BY wiretap.hit_year DESC, wiretap.hit_month DESC, wiretap.hit_day DESC
 		// LIMIT 100000;
-		$dbr = wfGetDB( DB_REPLICA );
+		//
 
-		$res = $dbr->select(
-			array('w' => 'wiretap'),
-			array(
-				"w.hit_year AS year",
-				"w.hit_month AS month",
-				"w.hit_day AS day",
-				"count(*) AS num_hits",
-			),
-			null, // CONDITIONS? 'wiretap.hit_timestamp>20131001000000',
-			__METHOD__,
-			array(
-				"DISTINCT",
-				"GROUP BY" => "w.hit_year, w.hit_month, w.hit_day",
-				"ORDER BY" => "w.hit_year DESC, w.hit_month DESC, w.hit_day DESC",
-				"LIMIT" => "100000",
-			),
-			null // join conditions
-		);
-		while( $row = $dbr->fetchRow( $res ) ) {
+		$res = $this->databaseRead->newSelectQueryBuilder()
+				->select( [
+						"w.hit_year AS year",
+						"w.hit_month AS month",
+						"w.hit_day AS day",
+						"count(*) AS num_hits",
+				] )
+				->distinct()
+				->from( 'wiretap', 'w' )
+				->groupBy( 'w.hit_year, w.hit_month, w.hit_day' )
+				->orderBy( 'w.hit_year DESC, w.hit_month DESC, w.hit_day DESC' )
+				->limit( 10000 )
+				->caller( __METHOD__ )
+				->fetchResultSet();
+
+		while( $row = $res->fetchRow() ) {
 
 			list($year, $month, $day, $hits) = array($row['year'], $row['month'], $row['day'], $row['num_hits']);
 			$html .= "<tr><td>$year-$month-$day</td><td>$hits</td></tr>";
@@ -205,29 +208,24 @@ class SpecialWiretap extends SpecialPage {
 
 		$html = '<canvas id="wiretapChart" width="400" height="400"></canvas>';
 
-		$dbr = wfGetDB( DB_REPLICA );
+                $res = $db->newSelectQueryBuilder()
+                                ->select( [
+                                                "w.hit_year AS year",
+                                                "w.hit_month AS month",
+                                                "w.hit_day AS day",
+                                                "count(*) AS num_hits",
+                                        ] )
+                                ->from( 'wiretap', 'w' )
+                                ->distinct()
+                                ->groupBy( 'w.hit_year, w.hit_month, w.hit_day' )
+				->orderBy( 'w.hit_year DESC, w.hit_month DESC, w.hit_day DESC' )
+				->limit( 10000 )
+                                ->caller( __METHOD__ )
+                                ->fetchResultSet();
 
-		$res = $dbr->select(
-			array('w' => 'wiretap'),
-			array(
-				"w.hit_year AS year",
-				"w.hit_month AS month",
-				"w.hit_day AS day",
-				"count(*) AS num_hits",
-			),
-			null, //'w.hit_timestamp > 20140801000000', //null, // CONDITIONS? 'wiretap.hit_timestamp>20131001000000',
-			__METHOD__,
-			array(
-				"DISTINCT",
-				"GROUP BY" => "w.hit_year, w.hit_month, w.hit_day",
-				"ORDER BY" => "w.hit_year ASC, w.hit_month ASC, w.hit_day ASC",
-				"LIMIT" => "100000",
-			),
-			null // join conditions
-		);
 		$previous = null;
 
-		while( $row = $dbr->fetchRow( $res ) ) {
+                while( $row = $res->fetchRow() ) {
 
 			list($year, $month, $day, $hits) = array($row['year'], $row['month'], $row['day'], $row['num_hits']);
 
@@ -252,8 +250,6 @@ class SpecialWiretap extends SpecialPage {
 
 	protected function getUniqueRows ( $uniquePageHits = true, $order = "DESC" ) {
 
-		$dbr = wfGetDB( DB_REPLICA );
-
 		$fields = array(
 			"CONCAT(w.hit_year, '-', w.hit_month, '-', w.hit_day) AS date",
 		);
@@ -265,22 +261,19 @@ class SpecialWiretap extends SpecialPage {
 			$fields[] = "COUNT(DISTINCT(w.user_name)) as hits";
 		}
 
-		$res = $dbr->select(
-			array('w' => 'wiretap'),
-			$fields,
-			null, // CONDITIONS? 'wiretap.hit_timestamp>20131001000000',
-			__METHOD__,
-			array(
-				// "DISTINCT",
-				"GROUP BY" => "w.hit_year, w.hit_month, w.hit_day",
-				"ORDER BY" => "w.hit_timestamp $order",
-				"LIMIT" => "100000",
-			),
-			null // join conditions
-		);
+		$res = $this->databaseRead->newSelectQueryBuilder()
+                                ->select( $fields )
+				->from( 'wiretap', 'w' )
+				->distinct()
+				->groupBy( 'w.hit_year, w.hit_month, w.hit_day' )
+				->orderBy( 'w.hit_timestamp ' . $order )
+				->limit( 10000 )
+                                ->caller( __METHOD__ )
+                                ->fetchResultSet();
 
 		$output = array();
-		while( $row = $dbr->fetchRow( $res ) ) {
+
+		while( $row = $res->fetchRow() ) {
 
 			// list($year, $month, $day, $hits) = array($row['year'], $row['month'], $row['day'], $row['hits']);
 
@@ -380,42 +373,37 @@ class SpecialWiretap extends SpecialPage {
 
 		$html = '<div id="wiretap-chart"><svg height="400px"></svg></div>';
 
-		$dbr = wfGetDB( DB_REPLICA );
+		$res = $this->databaseRead->newSelectQueryBuilder()
+				->select( [
+						"w.hit_year AS year",
+						"w.hit_month AS month",
+						"w.hit_day AS day",
+						"count(*) AS num_hits",
+					] )
+				->from( 'wiretap', 'w' )
+				->distinct()
+				->groupBy( 'w.hit_year, w.hit_month, w.hit_day' )
+				->orderBy( 'w.hit_year DESC, w.hit_month DESC, w.hit_day DESC' )
+				->limit( 10000 )
+				->caller( __METHOD__ )
+				->fetchResultSet();
 
-		$res = $dbr->select(
-			array('w' => 'wiretap'),
-			array(
-				"w.hit_year AS year",
-				"w.hit_month AS month",
-				"w.hit_day AS day",
-				"count(*) AS num_hits",
-			),
-			null, //'w.hit_timestamp > 20140801000000', //null, // CONDITIONS? 'wiretap.hit_timestamp>20131001000000',
-			__METHOD__,
-			array(
-				"DISTINCT",
-				"GROUP BY" => "w.hit_year, w.hit_month, w.hit_day",
-				"ORDER BY" => "w.hit_year ASC, w.hit_month ASC, w.hit_day ASC",
-				"LIMIT" => "100000",
-			),
-			null // join conditions
-		);
-
-		$previous = null;
-
-		while( $row = $dbr->fetchRow( $res ) ) {
+		while( $row = $res->fetchRow() ) {
 
 			list($year, $month, $day, $hits) = array($row['year'], $row['month'], $row['day'], $row['num_hits']);
 
 			$currentDateString = "$year-$month-$day";
 			$current = new DateTime( $currentDateString );
 
-			while ( $previous && $previous->modify( '+1 day' )->format( 'Y-m-d') !== $currentDateString ) {
-				$data[] = array(
-					'x' => $previous->getTimestamp() * 1000, // x value timestamp in milliseconds
-					'y' => 0, // y value = zero hits for this day
-				);
-			}
+			// Not sure what this code is doing but it is causing memory issues in PHP 8.1
+			// Commenting out. If you know what this does, please email github@rechenberg.net
+			//
+			//while ( $previous && $previous->modify( '+1 day' )->format( 'Y-m-d') !== $currentDateString ) {
+			//	$data[] = array(
+			//		'x' => $previous->getTimestamp() * 1000, // x value timestamp in milliseconds
+			//		'y' => 0, // y value = zero hits for this day
+			//	);
+			//}
 
 			$data[] = array(
 				'x' => strtotime( $currentDateString ) * 1000, // x value time in milliseconds
@@ -423,6 +411,7 @@ class SpecialWiretap extends SpecialPage {
 			);
 
 			$previous = new DateTime( $currentDateString );
+
 		}
 
 		$data = array(
